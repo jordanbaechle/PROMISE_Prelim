@@ -1,0 +1,271 @@
+
+
+```{r}
+Pre9_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9_pvalue_metaboanalyst.xlsx")
+Pre6_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre6_pvalue_metaboanalyst.xlsx")
+Pre3_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre3_pvalue_metaboanalyst.xlsx")
+Pre0_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre0_pvalue_metaboanalyst.xlsx")
+
+Pre9630_pvalue <- Pre9_pvalue %>%
+              left_join(Pre6_pvalue, by='path') %>%
+              left_join(Pre3_pvalue, by='path') %>%
+              left_join(Pre0_pvalue, by='path')
+
+#Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+write_csv(Pre9630_pvalue, 
+          file = "/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue_all.csv")
+
+
+```
+
+
+```{r}
+library(tidyverse)
+library(ggbeeswarm)
+library(packcircles)
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+```
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_9 <- -log10(Pre9630_pvalue$RawP_9)
+
+Pre9_bubble <- ggplot(Pre9630_pvalue, aes(Pre9, RawP_9, fill = RawP_9)) +
+geom_quasirandom(aes(size = Impact_9), 
+                   size = 3,
+                   method = "smiley",
+                   shape = 21, 
+                   alpha = c(ifelse(abs(Pre9630_pvalue$RawP_6) > 1.3, 1, 0.25)), 
+                   groupOnX = FALSE, 
+                   width =0.45) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Bile secretion'),
+                  color = "black",
+                  fill="#E64B35B2",
+                  method = "smiley",
+                  groupOnX = FALSE, 
+                   width =0.45,
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Phe metabolism'),
+                  color = "black",
+                  fill="#4DBBD5B2",
+                  method = "smiley",
+                  groupOnX = FALSE, 
+                   width =0.45,
+                  shape = 21,
+                  size=3) +
+geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Cys/Met metabolism'),
+                  color = "black",
+                  fill="#00A087B2",
+                  method = "smiley",
+                  groupOnX = FALSE, 
+                   width =0.45,
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Retrograde EC signaling'),
+                  color = "black",
+                  fill="#F39B7FB2",
+                  method = "smiley",
+                  groupOnX = FALSE, 
+                   width =0.45,
+                  shape = 21,
+                  size=3) +
+  geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Choline metabolism'),
+                  color = "black",
+                  fill="#8491B4B2",
+                  method = "smiley",
+                  groupOnX = FALSE, 
+                   width =0.45,
+                  shape = 21,
+                  size=3) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "grey") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre9_bubble
+```
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_6 <- -log10(Pre9630_pvalue$RawP_6)
+Pre6_bubble <- ggplot(Pre9630_pvalue, aes(Pre6, RawP_6, fill = RawP_6)) +
+geom_quasirandom(aes(size = Impact_6), 
+                   size = 3,
+                   method = "smiley",
+                   shape = 21, 
+                   alpha = c(ifelse(abs(Pre9630_pvalue$RawP_6) > 1.3, 1, 0.25)), 
+                   groupOnX = FALSE, 
+                   priority = "random", 
+                   width =0.45) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Bile secretion'),
+                  color = "black",
+                  fill="#E64B35B2",
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Phe metabolism'),
+                  color = "black",
+                  fill="#4DBBD5B2",
+                  shape = 21,
+                  size=3) +
+geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Cys/Met metabolism'),
+                  color = "black",
+                  fill="#00A087B2",
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Retrograde EC signaling'),
+                  color = "black",
+                  fill="#F39B7FB2",
+                  shape = 21,
+                  size=3) +
+  geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Choline metabolism'),
+                  color = "black",
+                  fill="#8491B4B2",
+                  shape = 21,
+                  size=3) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "grey") +
+  coord_cartesian(clip = "off")  +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre6_bubble
+```
+
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_3 <- -log10(Pre9630_pvalue$RawP_3)
+
+Pre3_bubble <- ggplot(Pre9630_pvalue, aes(Pre3, RawP_3, fill = RawP_3)) +
+ # geom_beeswarm(aes(size = Impact_9), shape = 21, alpha = .8, groupOnX = FALSE, priority = "random") +
+  geom_quasirandom(aes(size = Impact_3), 
+                   size = 3,
+                   method = "smiley",
+                   shape = 21, 
+                   alpha = c(ifelse(abs(Pre9630_pvalue$RawP_3) > 1.3, 1, 0.25)), 
+                   groupOnX = FALSE, 
+                   priority = "random", 
+                   width =0.45) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Bile secretion'),
+                  color = "black",
+                  fill="#E64B35B2",
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Phe metabolism'),
+                  color = "black",
+                  fill="#4DBBD5B2",
+                  shape = 21,
+                  size=3) +
+geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Cys/Met metabolism'),
+                  color = "black",
+                  fill="#00A087B2",
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Retrograde EC signaling'),
+                  color = "black",
+                  fill="#F39B7FB2",
+                  shape = 21,
+                  size=3) +
+  geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Choline metabolism'),
+                  color = "black",
+                  fill="#8491B4B2",
+                  shape = 21,
+                  size=3) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "grey") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre3_bubble
+```
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_0 <- -log10(Pre9630_pvalue$RawP_0)
+
+Pre0_bubble <- ggplot(Pre9630_pvalue, aes(Pre0, RawP_0, fill = RawP_0)) +
+ # geom_beeswarm(aes(size = Impact_9), shape = 21, alpha = .8, groupOnX = FALSE, priority = "random") +
+geom_quasirandom(aes(size = Impact_0), 
+                   size = 3,
+                   method = "smiley",
+                   shape = 21, 
+                   alpha = c(ifelse(abs(Pre9630_pvalue$RawP_0) > 1.3, 1, 0.25)), 
+                   groupOnX = FALSE, 
+                   priority = "random", 
+                   width =0.45) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Bile secretion'),
+                  color = "black",
+                  fill="#E64B35B2",
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Phe metabolism'),
+                  color = "black",
+                  fill="#4DBBD5B2",
+                  shape = 21,
+                  size=3) +
+geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Cys/Met metabolism'),
+                  color = "black",
+                  fill="#00A087B2",
+                  shape = 21,
+                  size=3) +
+ geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Retrograde EC signaling'),
+                  color = "black",
+                  fill="#F39B7FB2",
+                  shape = 21,
+                  size=3) +
+  geom_quasirandom(data = Pre9630_pvalue %>% filter(path == 'Choline metabolism'),
+                  color = "black",
+                  fill="#8491B4B2",
+                  shape = 21,
+                  size=3) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "grey") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+
+Pre0_bubble
+```
+
+
+```{r}
+bubble <- ggarrange(Pre9_bubble + rremove("xlab"), 
+                Pre6_bubble + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre3_bubble + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"),
+                Pre0_bubble + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                ncol = 4, nrow = 1, legend = "none", align = "hv")
+bubble
+ggsave("PM2_volcano.png", plot=bubble, path=figures, height=5, width=14, units=c("in"), dpi=300)
+```

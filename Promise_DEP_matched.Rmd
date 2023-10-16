@@ -1,0 +1,248 @@
+
+### Time of Dx Proteomic Pathway
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+
+# Select patient samples 3 years prior to DM diagnosis
+# Select patient samples 3 years prior to DM diagnosis
+pre0_countData <- df |>
+select("protein", 
+      "X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6")
+
+metaData0 <- data.frame (
+      id  = 
+      c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+        "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+        "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control"))
+
+
+df0 <- cbind(as.data.frame(pre0_countData[,1]), sapply(pre0_countData[,-1], as.numeric))
+colnames(df0)[1] <- "protein"
+pre0_countData <- as.data.frame(df0)
+pre0_countData   <- pre0_countData  |> na.omit()
+
+# Differential Proteins 
+countData <- as.data.frame(pre0_countData)
+metaData <- as.data.frame(metaData0)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+DEGs <- results(dds, contrast=c("Site","Convert", "Control"))
+
+# All Differential Proteins
+DEGs_sig_all <- subset(DEGs, pvalue <= 0.05)
+DEGs_sig_all <- as.data.frame(DEGs_sig_all)
+DEGs_sig_all$protein <- rownames(DEGs_sig_all)
+write_csv(DEGs_sig_all, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre0_DEP_all.csv")
+
+# Up-regulated Proteins
+DEGs_sig_up <- subset(DEGs, pvalue <= 0.05 & log2FoldChange >= 0)
+DEGs_sig_up <- as.data.frame(DEGs_sig_up)
+DEGs_sig_up$protein <- rownames(DEGs_sig_up)
+DEGs_sig_up <- DEGs_sig_up |> select("protein")
+write_csv(DEGs_sig_up, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre0_DEP_up.csv")
+
+# Down-regulated Proteins
+DEGs_sig_down <- subset(DEGs, pvalue <= 0.05 & log2FoldChange <= 0)
+DEGs_sig_down <- as.data.frame(DEGs_sig_down)
+DEGs_sig_down$protein <- rownames(DEGs_sig_down)
+DEGs_sig_down <- DEGs_sig_down |> select("protein")
+write_csv(DEGs_sig_down, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre0_DEP_down.csv")
+```
+
+### Tdx-3 Proteomic Pathway
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+
+# Select patient samples 3 years prior to DM diagnosis
+pre3_countData <- df |>
+select("protein", 
+       "X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6")
+
+metaData3 <- data.frame (
+      id  = 
+      c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control"))
+
+
+df3 <- cbind(as.data.frame(pre3_countData[,1]), sapply(pre3_countData[,-1], as.numeric))
+colnames(df3)[1] <- "protein"
+pre3_countData <- as.data.frame(df3)
+pre3_countData   <- pre3_countData  |> na.omit()
+
+# Differential Proteins 
+countData <- as.data.frame(pre3_countData)
+metaData <- as.data.frame(metaData3)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+DEGs <- results(dds, contrast=c("Site","Convert", "Control"))
+
+# All Differential Proteins
+DEGs_sig_all <- subset(DEGs, pvalue <= 0.05)
+DEGs_sig_all <- as.data.frame(DEGs_sig_all)
+DEGs_sig_all$protein <- rownames(DEGs_sig_all)
+write_csv(DEGs_sig_all, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre3_DEP_all.csv")
+
+# Up-regulated Proteins
+DEGs_sig_up <- subset(DEGs, pvalue <= 0.05 & log2FoldChange >= 0)
+DEGs_sig_up <- as.data.frame(DEGs_sig_up)
+DEGs_sig_up$protein <- rownames(DEGs_sig_up)
+DEGs_sig_up <- DEGs_sig_up |> select("protein")
+write_csv(DEGs_sig_up, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre3_DEP_up.csv")
+
+# Down-regulated Proteins
+DEGs_sig_down <- subset(DEGs, pvalue <= 0.05 & log2FoldChange <= 0)
+DEGs_sig_down <- as.data.frame(DEGs_sig_down)
+DEGs_sig_down$protein <- rownames(DEGs_sig_down)
+DEGs_sig_down <- DEGs_sig_down |> select("protein")
+write_csv(DEGs_sig_down, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre3_DEP_down.csv")
+```
+
+### Tdx-6 Proteomics
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+metaData6 <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre6_promise_dm.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+
+# Select patient samples 6 years prior to DM diagnosis
+pre6_countData <- df |>
+select("protein", 
+       "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control",
+        "Convert", "Control"))
+
+df6 <- cbind(as.data.frame(pre6_countData[,1]), sapply(pre6_countData[,-1], as.numeric))
+colnames(df6)[1] <- "protein"
+pre6_countData <- as.data.frame(df6)
+
+# Differential Proteins 
+countData <- as.data.frame(pre6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+DEGs <- results(dds, contrast=c("Site", "Convert", "Control"))
+
+# All Differential Proteins
+DEGs_sig_all <- subset(DEGs, pvalue <= 0.05)
+DEGs_sig_all <- as.data.frame(DEGs_sig_all)
+DEGs_sig_all$protein <- rownames(DEGs_sig_all)
+write_csv(DEGs_sig_all, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre6_DEP_all.csv")
+
+# Up-regulated Proteins
+DEGs_sig_up <- subset(DEGs, pvalue <= 0.05 & log2FoldChange >= 0)
+DEGs_sig_up <- as.data.frame(DEGs_sig_up)
+DEGs_sig_up$protein <- rownames(DEGs_sig_up)
+DEGs_sig_up <- DEGs_sig_up |> select("protein")
+write_csv(DEGs_sig_up, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre6_DEP_up.csv")
+
+# Down-regulated Proteins
+DEGs_sig_down <- subset(DEGs, pvalue <= 0.05 & log2FoldChange <= 0)
+DEGs_sig_down <- as.data.frame(DEGs_sig_down)
+DEGs_sig_down$protein <- rownames(DEGs_sig_down)
+DEGs_sig_down <- DEGs_sig_down |> select("protein")
+write_csv(DEGs_sig_down, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre6_DEP_down.csv")
+```
+
+### Tdx-9 Proteomics
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+# Select patient samples 9 years prior to DM diagnosis
+pre9_countData <- df |>
+select("protein", 
+       "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0")
+
+metaData9 <- data.frame (
+      id  = 
+      c( "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+        "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),
+      Site = 
+      c("Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control"))
+
+df9 <- cbind(as.data.frame(pre9_countData[,1]), sapply(pre9_countData[,-1], as.numeric))
+colnames(df9)[1] <- "protein"
+pre9_countData <- as.data.frame(df9)
+pre9_countData   <- pre9_countData  |> na.omit()
+
+# Differential Proteins 
+countData <- as.data.frame(pre9_countData)
+metaData <- as.data.frame(metaData9)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+DEGs <- results(dds, contrast=c("Site", "Convert", "Control"))
+
+# All Differential Proteins
+DEGs_sig_all <- subset(DEGs, pvalue <= 0.05)
+DEGs_sig_all <- as.data.frame(DEGs_sig_all)
+DEGs_sig_all$protein <- rownames(DEGs_sig_all)
+write_csv(DEGs_sig_all, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre9_DEP_all.csv")
+
+# Up-regulated Proteins
+DEGs_sig_up <- subset(DEGs, pvalue <= 0.05 & log2FoldChange >= 0)
+DEGs_sig_up <- as.data.frame(DEGs_sig_up)
+DEGs_sig_up$protein <- rownames(DEGs_sig_up)
+DEGs_sig_up <- DEGs_sig_up |> select("protein")
+write_csv(DEGs_sig_up, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre9_DEP_up.csv")
+
+# Down-regulated Proteins
+DEGs_sig_down <- subset(DEGs, pvalue <= 0.05 & log2FoldChange <= 0)
+DEGs_sig_down <- as.data.frame(DEGs_sig_down)
+DEGs_sig_down$protein <- rownames(DEGs_sig_down)
+DEGs_sig_down <- DEGs_sig_down |> select("protein")
+write_csv(DEGs_sig_down, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre9_DEP_down.csv")
+```

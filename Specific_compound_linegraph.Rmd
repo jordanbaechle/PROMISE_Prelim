@@ -1,0 +1,611 @@
+
+
+
+Tdx - 9 years
+```{r}
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df9_demo<- Demo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+                  "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+                  "X2321.0.Y0", "X2249.0.Y0"),]
+df9_demo$id <- rownames(df9_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df9_count <- as.data.frame(countData)
+rownames(df9_count) <- df9_count$id_sample
+df9_count<- df9_count[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+                        "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+                        "X2321.0.Y0", "X2249.0.Y0"),]
+df9_count$id <- rownames(df9_count) 
+df9_demo_count <- merge(df9_demo, df9_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df9_metabo <- data.frame(countData)
+rownames(df9_metabo) <- df9_metabo$id_sample 
+df9_metabo <- df9_metabo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+                           "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+                           "X2321.0.Y0", "X2249.0.Y0"),]
+df9_metabo$id <- rownames(df9_metabo) 
+
+# combine
+df9_demo_npx_metabo <- merge(df9_demo_count, df9_metabo, by="id")
+
+df9_demo_npx_metabo <- df9_demo_npx_metabo %>%
+  add_column(Year = "-9")
+df9_demo_npx_metabo
+```
+
+         
+
+```{r}
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df6_demo<- Demo[c("X2285.0.Y3", "X2280.0.Y3", "X2261.0.Y3", "X2249.0.Y3", "X2220.0.Y3",
+                  "X2186.0.Y3", "X2089.0.Y3", "X2070.0.Y3", "X1249.0.Y3", "X1075.0.Y3",
+                  "X1129.0.Y3",
+                        
+                   "X1152.0.Y3", "X1266.0.Y0", "X1300.0.Y3", "X1397.0.Y3", "X2042.0.Y0", 
+                   "X2099.0.Y3", "X2127.0.Y3", "X2265.0.Y0", "X2321.0.Y3"),]
+df6_demo$id <- rownames(df6_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df6_count <- as.data.frame(countData)
+rownames(df6_count) <- df6_count$id_sample
+df6_count<- df6_count[c("X2285.0.Y3", "X2280.0.Y3", "X2261.0.Y3", "X2249.0.Y3", "X2220.0.Y3",
+                        "X2186.0.Y3", "X2089.0.Y3", "X2070.0.Y3", "X1249.0.Y3", "X1075.0.Y3",
+                        "X1129.0.Y3",
+                        
+                        "X1152.0.Y3", "X1266.0.Y0", "X1300.0.Y3", "X1397.0.Y3", "X2042.0.Y0", 
+                        "X2099.0.Y3", "X2127.0.Y3", "X2265.0.Y0", "X2321.0.Y3"),]
+df6_count$id <- rownames(df6_count) 
+df6_demo_count <- merge(df6_demo, df6_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df6_metabo <- data.frame(countData)
+rownames(df6_metabo) <- df6_metabo$id_sample 
+df6_metabo <- df6_metabo[c("X2285.0.Y3", "X2280.0.Y3", "X2261.0.Y3", "X2249.0.Y3", "X2220.0.Y3",
+                        "X2186.0.Y3", "X2089.0.Y3", "X2070.0.Y3", "X1249.0.Y3", "X1075.0.Y3",
+                        "X1129.0.Y3",
+                        
+                        "X1152.0.Y3", "X1266.0.Y0", "X1300.0.Y3", "X1397.0.Y3", "X2042.0.Y0", 
+                        "X2099.0.Y3", "X2127.0.Y3", "X2265.0.Y0", "X2321.0.Y3"),]
+df6_metabo$id <- rownames(df6_metabo)
+
+# combine
+df6_demo_npx_metabo <- merge(df6_demo_count, df6_metabo, by="id")
+
+df6_demo_npx_metabo <- df6_demo_npx_metabo %>%
+  add_column(Year = "-6")
+df6_demo_npx_metabo
+```
+
+
+
+```{r}
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df3_demo<- Demo[c("X2285.0.Y6", "X2280.0.Y6", "X2261.0.Y6", "X2186.0.Y6", 
+                        "X2089.0.Y6", "X2070.0.Y6", "X1249.0.Y6", "X1150.0.Y6", 
+                        "X1075.0.Y6",
+                      
+                        "X1177.0.Y0", "X1131.0.Y0", "X1266.0.Y3", "X2042.0.Y3", 
+                        "X2265.0.Y3", "X1152.0.Y6", "X1300.0.Y6", "X1397.0.Y6", 
+                        "X2099.0.Y6", "X2127.0.Y6"),]
+df3_demo$id <- rownames(df3_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df3_count <- as.data.frame(countData)
+rownames(df3_count) <- df3_count$id_sample
+df3_count<- df3_count[c("X2285.0.Y6", "X2280.0.Y6", "X2261.0.Y6", "X2186.0.Y6", 
+                        "X2089.0.Y6", "X2070.0.Y6", "X1249.0.Y6", "X1150.0.Y6", 
+                        "X1075.0.Y6",
+                      
+                        "X1177.0.Y0", "X1131.0.Y0", "X1266.0.Y3", "X2042.0.Y3", 
+                        "X2265.0.Y3", "X1152.0.Y6", "X1300.0.Y6", "X1397.0.Y6", 
+                        "X2099.0.Y6", "X2127.0.Y6"),]
+df3_count$id <- rownames(df3_count) 
+df3_demo_count <- merge(df3_demo, df3_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df3_metabo <- data.frame(countData)
+rownames(df3_metabo) <- df3_metabo$id_sample 
+df3_metabo <- df3_metabo[c("X2285.0.Y6", "X2280.0.Y6", "X2261.0.Y6", "X2186.0.Y6", 
+                        "X2089.0.Y6", "X2070.0.Y6", "X1249.0.Y6", "X1150.0.Y6", 
+                        "X1075.0.Y6",
+                      
+                        "X1177.0.Y0", "X1131.0.Y0", "X1266.0.Y3", "X2042.0.Y3", 
+                        "X2265.0.Y3", "X1152.0.Y6", "X1300.0.Y6", "X1397.0.Y6", 
+                        "X2099.0.Y6", "X2127.0.Y6"),]
+df3_metabo$id <- rownames(df3_metabo) 
+df3_demo_npx_metabo <- merge(df3_demo_count, df3_metabo, by="id")
+
+df3_demo_npx_metabo <- df3_demo_npx_metabo %>%
+  add_column(Year = "-3")
+df3_demo_npx_metabo
+```
+
+
+```{r}
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df0_demo<- Demo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+                  "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+                  "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df0_demo$id <- rownames(df0_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df0_count <- as.data.frame(countData)
+rownames(df0_count) <- df0_count$id_sample
+df0_count<- df0_count[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+                        "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+                        "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df0_count$id <- rownames(df0_count) 
+df0_demo_count <- merge(df0_demo, df0_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df0_metabo <- data.frame(countData)
+rownames(df0_metabo) <- df0_metabo$id_sample 
+df0_metabo <- df0_metabo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+                           "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+                           "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df0_metabo$id <- rownames(df0_metabo) 
+df0_demo_npx_metabo <- merge(df0_demo_count, df0_metabo, by="id")
+
+df0_demo_npx_metabo <- df0_demo_npx_metabo %>%
+  add_column(Year = "0")
+df0_demo_npx_metabo
+
+```
+
+
+
+
+```{r}
+df0369_demo_npx_metabo = rbind(df0_demo_npx_metabo, df3_demo_npx_metabo, df6_demo_npx_metabo, df9_demo_npx_metabo)
+write_csv(df0369_demo_npx_metabo, file = "/bigrock/FurmanLab/DataRepository/promise/df0369_demo_npx_metabo.csv")
+```
+
+
+
+```{r}
+#df0369_demo_npx_metabo$id <- sapply(df0369_demo_npx_metabo$id, function(x)paste(strsplit(x,split=".")[[1]][1:2], collapse = "."))
+
+ggplot(data=df0369_demo_npx_metabo, aes(x=Year, y=YOD1, group=id_patient, color=health_status)) +
+  geom_line()+
+  theme_pubr() +
+  theme(plot.title = element_text(face="bold"),
+         axis.text.y = element_text(),
+         axis.text = element_text(size = 12),
+         legend.title = element_blank())  + 
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  xlab("Year of Study") + ylab(" ") +
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF"))
+
+```
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="cholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+CA <- ggplot(data_sum, 
+           aes(x = Year, y = cholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = cholate-se, ymax = cholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = health_status),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Cholate\n(CA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,20), breaks=seq(0,20, by = 5)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF")) 
+CA
+```
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="chenodeoxycholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+CDCA <- ggplot(data_sum, 
+           aes(x = Year, y = chenodeoxycholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = chenodeoxycholate-se, ymax = chenodeoxycholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = health_status),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Chenodeoxycholate\n(CDCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,1.6), breaks=seq(0,1.6, by = 0.4)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF")) 
+CDCA
+```
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="deoxycholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+DCA <- ggplot(data_sum, 
+           aes(x = Year, y = deoxycholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = deoxycholate-se, ymax = deoxycholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = health_status),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Deoxycholate\n(DCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,2), breaks=seq(0,2, by = 0.4)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF")) 
+DCA
+```
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="lithocholate.sulfate..1.", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+LCAS <- ggplot(data_sum, 
+           aes(x = Year, y = lithocholate.sulfate..1., 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = lithocholate.sulfate..1.-se, ymax = lithocholate.sulfate..1.+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = health_status),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Lithocholate Sulfate\n(LCA-S)') + 
+  theme(text = element_text(size=18)) +
+ # scale_y_continuous(limits=c(0,20), breaks=seq(0,20, by = 5)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF")) 
+LCAS
+```
+
+
+
+
+
+
+
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="ursodeoxycholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+UDCA <- ggplot(data_sum, 
+           aes(x = Year, y = ursodeoxycholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = ursodeoxycholate-se, ymax = ursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = health_status),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Ursodeoxycholate\n(UDCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,4), breaks=seq(0,4, by = 1)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF")) 
+UDCA
+```
+
++
+  scale_x_discrete(labels=c("-9" = "Dose 0", 
+                            "-6" = "Dose 1",
+                            "-3" = "Dose 2",
+                            "0"  =  "Dose 3"))
+                            
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="isoursodeoxycholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+IUDCA <- ggplot(data_sum, 
+           aes(x = Year, y = isoursodeoxycholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = isoursodeoxycholate-se, ymax = isoursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Isoursodeoxycholate\n(IUDCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,8), breaks=seq(0,8, by = 2)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF"))
+IUDCA
+```
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="isoursodeoxycholate.sulfate..1.", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+IUDCAS <- ggplot(data_sum, 
+           aes(x = Year, y = isoursodeoxycholate.sulfate..1., 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = isoursodeoxycholate.sulfate..1.-se, ymax = isoursodeoxycholate.sulfate..1.+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Isoursodeoxycholate-Sulfate\n(IUDCA-S)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,1.6), breaks=seq(0,1.6, by = .4)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF"))
+IUDCAS
+```
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="glycoursodeoxycholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+GUDCA <- ggplot(data_sum, 
+           aes(x = Year, y = glycoursodeoxycholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = glycoursodeoxycholate-se, ymax = glycoursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Glycoursodeoxycholate\n(GUDCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,4), breaks=seq(0,4, by = 1)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF"))
+GUDCA
+```
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="tauroursodeoxycholate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.0) 
+TUDCA <- ggplot(data_sum, 
+           aes(x = Year, y = tauroursodeoxycholate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = tauroursodeoxycholate-se, ymax = tauroursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Tauroursodeoxycholate\n(TUDCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,2), breaks=seq(0,2, by = 0.5)) + 
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF"))
+TUDCA
+```
+
+
+Primary Bile Acids:
+
+
+Seconday Bile Acids:
+
+
+Conjugated Bile Acids:
+
+
+chenodeoxycholate
+
+taurocholate
+taurodeoxycholate
+glycodeoxycholate
+X7.ketodeoxycholate
+
+glycolithocholate
+
+ursodeoxycholate
+isoursodeoxycholate
+isoursodeoxycholate.sulfate..1.
+glycoursodeoxycholate
+tauroursodeoxycholate
+
+
+```{r}
+UDCAss <- ggarrange(
+        UDCA,
+        IUDCA, 
+        IUDCAS, 
+        GUDCA, 
+        TUDCA,
+        ncol = 1, nrow = 5, common.legend = TRUE, align = "hv", legend = "none") 
+UDCAss 
+
+ggsave("UDCAs.png", plot=UDCAss, path=figures, height=19, width=5, units=c("in"), dpi=300)
+```
+
+
+
+
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="X2.hydroxyhippurate..salicylurate.", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+salicylurate <- ggplot(data_sum, 
+           aes(x = Year, y = X2.hydroxyhippurate..salicylurate., 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = X2.hydroxyhippurate..salicylurate.-se, ymax = X2.hydroxyhippurate..salicylurate.+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Salicylurate') + 
+  theme(text = element_text(size=18)) +
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF"))
+salicylurate
+```
+
+
+
+
+
+
+```{r}
+df0369_demo_npx_metabo$Year <- as.numeric(df0369_demo_npx_metabo$Year)
+data_sum <- summarySE(df0369_demo_npx_metabo, measurevar="salicylate", groupvars=c("health_status","Year"))
+pd <- position_dodge(0.00) 
+salicylate <- ggplot(data_sum, 
+           aes(x = Year, y = salicylate, 
+               colour = health_status)) + 
+  geom_errorbar(aes(ymin = salicylate-se, ymax = salicylate+se), 
+                colour = "black", 
+                width = 0.13, 
+                position = pd,
+                size = 1) +
+  geom_line(position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = health_status),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  labs(x = 'Years till DM', 
+       y = 'Salicylate') + 
+  theme(text = element_text(size=20)) +
+  scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+  scale_color_manual(values=c("#E64B35FF", "#00A087FF"))
+salicylate
+```
+

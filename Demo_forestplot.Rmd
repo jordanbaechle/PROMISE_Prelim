@@ -1,0 +1,205 @@
+
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/Odds_ratios_9630_promise.xlsx")
+Demo <- as.data.frame(Demo)
+```
+
+```{r}
+df9 <- data.frame(
+   Type = Demo$Type,
+   Measure = Demo$Measure,
+   OR = log(Demo$OR_pre9),
+   Lower = log(Demo$Low_pre9),
+   Upper = log(Demo$High_pre9),
+   Pvalue = Demo$p.ratio_pre9,
+   Error = Demo$High_pre9 - Demo$OR_pre9,
+   logEror = log(abs(Demo$High_pre9 - Demo$OR_pre9)))
+df9 <- df9 %>%
+  add_column(Year = "Year -9")
+
+df6 <- data.frame(
+   Type = Demo$Type,
+   Measure = Demo$Measure,
+   OR = log(Demo$OR_pre6),
+   Lower = log(Demo$Low_pre6),
+   Upper = log(Demo$High_pre6),
+   Pvalue = Demo$p.ratio_pre6,
+   Error = Demo$High_pre6 - Demo$OR_pre6,
+   logEror = log(abs(Demo$High_pre6 - Demo$OR_pre6)))
+df6 <- df6 %>%
+  add_column(Year = "Year -6")
+
+df3 <- data.frame(
+   Type = Demo$Type,
+   Measure = Demo$Measure,
+   OR = log(Demo$OR_pre3),
+   Lower = log(Demo$Low_pre3),
+   Upper = log(Demo$High_pre3),
+   Pvalue = Demo$p.ratio_pre3,
+   Error = Demo$High_pre3 - Demo$OR_pre3,
+   logEror = log(abs(Demo$High_pre3 - Demo$OR_pre3)))
+df3 <- df3 %>%
+  add_column(Year = "Year -3")
+
+df0 <- data.frame(
+   Type = Demo$Type,
+   Measure = Demo$Measure,
+   OR = log(Demo$OR_pre0),
+   Lower = log(Demo$Low_pre0),
+   Upper = log(Demo$High_pre0),
+   Pvalue = Demo$p.ratio_pre0,
+   Error = Demo$High_pre0 - Demo$OR_pre0,
+   logEror = log(abs(Demo$High_pre0 - Demo$OR_pre0)))
+df0 <- df0 %>%
+  add_column(Year = "Year 0")
+
+df0369 = rbind(df0, df3, df6, df9)
+
+df0369 <- subset(df0369, df0369$Measure != "HDL") 
+df0369 <- subset(df0369, df0369$Measure != "TAG") 
+```
+
+
+
+
+
+
+
+
+```{r}
+forestplot_promise <- forestplot(
+  df0369,
+  name = Measure,
+  estimate = OR,
+  se = Error,
+  pvalue = Pvalue,
+  colour = Year,
+  shape = Year,
+  logodds = FALSE,
+  psignif = 0.05
+) + 
+  scale_x_continuous(breaks=seq(-2, 2, 0.5)) +
+ ggforce::facet_col(
+      facets = ~factor(Type, levels=c('Anthromophic', 'Physical Activity', 'Blood Pressure', 
+                                      'Labs (Blood)', 'Labs (Urine)', 
+                                      'Insulin Resistance', 'Insulin Sensitivity', 'Beta Cell Function')),
+    scales = "free_y",
+    space = "free"
+  )
+
+ggsave("Demo_forestplot.png", plot=forestplot_promise, path=figures, height=9, width=5, units=c("in"), dpi=300)
+```
+
+
+
+```{r}
+forestplot(
+  df = df0369,
+  estimate = OR,
+  se = Error,
+  pvalue = Pvalue,
+  xlab = "Log(Odds Ratio)",
+  colour = Year) +
+  scale_x_continuous(breaks=seq(-2, 2, 0.5))
+
+```
+
+```{r}
+#define colours for dots and bars
+dotCOLS = c("#E64B35FF", "#4DBBD5FF", "#00A087FF", "#F39B7FFF")
+barCOLS = c("#E64B35B2", "#4DBBD5B2", "#00A087B2", "#F39B7FB2")
+
+df0369 <- df0369 %>% 
+  mutate(Year= factor(Year, 
+                         levels = (c("Year 0",
+                                     "Year -3",
+                                     "Year -6",
+                                     "Year -9"))))
+
+
+p <- ggplot(df0369, 
+            aes(x=Measure,
+                y=OR, ymin=Lower, ymax=Upper,
+                col=Year,fill=Year)) + 
+#specify position here
+  geom_hline(yintercept=0, lty=2) +
+  geom_linerange(size=2, colour="black", position=position_dodge(width = 1.5)) +
+#specify position here too
+  geom_point(aes(fill=Year), size=2.5, shape=21, colour="black", stroke = 2, position=position_dodge(width = 1.5)) +
+  scale_x_discrete(name=" ") +
+  scale_fill_manual(values=dotCOLS)+
+  scale_y_continuous(name="Odds ratio", limits = c(-3, 3)) +
+  coord_flip() +
+  theme_minimal() + 
+ ggforce::facet_col(
+      facets = ~factor(Type, levels=c('Anthromophic', 'Physical Activity', 'Blood Pressure', 
+                                      'Labs (Blood)', 'Labs (Urine)', 
+                                      'Insulin Resistance', 'Insulin Sensitivity', 'Beta Cell Function')),
+    scales = "free_y",
+    space = "free"
+  ) +                             
+  theme(strip.text = element_text(face = "bold", hjust = 0))
+
+ggsave("Demo_forestplot.png", plot=p, path=figures, height=18, width=5, units=c("in"), dpi=300)
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+p_9 <- ggplot(df9, aes(x=Measure, y=OR, ymin=Lower, ymax=Upper)) + 
+#specify position here
+  geom_linerange(size=0.5, color="black") +
+  geom_hline(yintercept=0, lty=2) +
+#specify position here too
+  geom_point(size=3, shape=21, colour="black", fill='white', stroke = 0.5) +
+  scale_x_discrete(name="(Post)operative outcomes") +
+  scale_y_continuous(name="Log(Odds Ratio)", limits = c(-5, 5)) +
+  coord_flip() +
+  theme_pubr()
+p_9
+
+p_6 <- ggplot(df6, aes(x=Measure, y=OR, ymin=Lower, ymax=Upper)) + 
+#specify position here
+  geom_linerange(size=0.5, color="black") +
+  geom_hline(yintercept=0, lty=2) +
+#specify position here too
+  geom_point(size=3, shape=21, colour="black", fill='white', stroke = 0.5) +
+  scale_x_discrete(name="(Post)operative outcomes") +
+  scale_y_continuous(name="Log(Odds Ratio)", limits = c(-5, 5)) +
+  coord_flip() +
+  theme_pubr()
+p_6
+
+p_3 <- ggplot(df3, aes(x=Measure, y=OR, ymin=Lower, ymax=Upper)) + 
+#specify position here
+  geom_linerange(size=0.5, color="black") +
+  geom_hline(yintercept=0, lty=2) +
+#specify position here too
+  geom_point(size=3, shape=21, colour="black", fill='white', stroke = 0.5) +
+  scale_x_discrete(name="(Post)operative outcomes") +
+  scale_y_continuous(name="Log(Odds Ratio)", limits = c(-5, 5)) +
+  coord_flip() +
+  theme_pubr()
+p_3
+
+p_0 <- ggplot(df0, aes(x=Measure, y=OR, ymin=Lower, ymax=Upper)) + 
+#specify position here
+  geom_linerange(size=0.5, color="black") +
+  geom_hline(yintercept=0, lty=2) +
+#specify position here too
+  geom_point(size=3, shape=21, colour="black", fill='white', stroke = 0.5) +
+  scale_x_discrete(name="(Post)operative outcomes") +
+  scale_y_continuous(name="Log(Odds Ratio)", limits = c(-5, 5)) +
+  coord_flip() +
+  theme_pubr()
+p_0
+```
+

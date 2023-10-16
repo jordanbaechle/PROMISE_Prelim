@@ -1,0 +1,280 @@
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+countData  <- countData %>% distinct(metabolite, .keep_all = TRUE)
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+
+
+### comparison 1 (pre)
+preOGTT_pre6 <- df |>
+select("metabolite", 
+       "X2249.0.Y3", "X2321.0.Y3",
+       "X2280.0.Y3", "X2127.0.Y3", 
+       "X2089.0.Y3", "X2099.0.Y3", 
+       "X2261.0.Y3", "X1397.0.Y3", 
+       "X2070.0.Y3", "X1300.0.Y3",
+       "X2220.0.Y3", "X1152.0.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X2249.0.Y3", "X2321.0.Y3",
+       "X2280.0.Y3", "X2127.0.Y3", 
+       "X2089.0.Y3", "X2099.0.Y3", 
+       "X2261.0.Y3", "X1397.0.Y3", 
+       "X2070.0.Y3", "X1300.0.Y3",
+       "X2220.0.Y3", "X1152.0.Y3"),
+      
+      Site = 
+      c("Control", "Convert", 
+        "Control", "Convert",
+        "Control", "Convert",
+        "Control", "Convert",
+        "Control", "Convert",
+        "Control", "Convert"))
+
+
+df1 <- cbind(as.data.frame(preOGTT_pre6 [,1]), 
+            sapply(preOGTT_pre6 [,-1], as.numeric))
+colnames(df1)[1] <- "metabolite"
+control_6_countData <- as.data.frame(df1)
+control_6_countData  <- control_6_countData  |> na.omit()
+
+# Differential metabolites
+countData <- as.data.frame(control_6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+res <- results(dds, contrast=c("Site","Convert", "Control"))
+
+
+# Up-regulated Metabolites
+DEGs_sig_up <- subset(res, pvalue <= 0.05 & log2FoldChange >= 0)
+DEGs_sig_up <- as.data.frame(DEGs_sig_up)
+DEGs_sig_up$metabolite <- rownames(DEGs_sig_up)
+DEGs_sig_up <- DEGs_sig_up |> select("metabolite")
+write_csv(DEGs_sig_up, file = "/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Pre_DEM_up.csv")
+
+# Down-regulated Metabolites
+DEGs_sig_down <- subset(res, pvalue <= 0.05 & log2FoldChange <= 0)
+DEGs_sig_down <- as.data.frame(DEGs_sig_down)
+DEGs_sig_down$metabolite  <- rownames(DEGs_sig_down)
+DEGs_sig_down <- DEGs_sig_down |> select("metabolite")
+write_csv(DEGs_sig_down, file = "/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Pre_DEM_down.csv")
+
+keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+
+Pre6_OGTT <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      labSize = 0,
+                      pointSize = 1.5,
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = FALSE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      caption = NULL,
+                       max.overlaps = 50,
+                      maxoverlapsConnectors =50,
+                      widthConnectors = 0.3, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+Pre6_OGTT <- Pre6_OGTT + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  geom_point(size = 2, alpha = .9, na.rm = T, shape = 21, colour = "black")
+Pre6_OGTT
+# ggsave("Pre6_OGTT_Volcano_DEM.png", plot=Pre6_OGTT, path=figures, height=5, width=5, units=c("in"), dpi=300)
+
+
+
+
+
+### comparison 1 (pre)
+postOGTT_pre6 <- df |>
+select("metabolite", 
+       "X2249.120.Y3", "X2321.120.Y3",
+       "X2280.120.Y3", "X2127.120.Y3", 
+       "X2089.120.Y3", "X2099.120.Y3", 
+       "X2261.120.Y3", "X1397.120.Y3", 
+       "X2070.120.Y3", "X1300.120.Y3",
+       "X2220.120.Y3", "X1152.120.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X2249.120.Y3", "X2321.120.Y3",
+       "X2280.120.Y3", "X2127.120.Y3", 
+       "X2089.120.Y3", "X2099.120.Y3", 
+       "X2261.120.Y3", "X1397.120.Y3", 
+       "X2070.120.Y3", "X1300.120.Y3",
+       "X2220.120.Y3", "X1152.120.Y3"),
+      
+      Site = 
+      c("Control", "Convert", 
+        "Control", "Convert",
+        "Control", "Convert",
+        "Control", "Convert",
+        "Control", "Convert",
+        "Control", "Convert"))
+
+
+df2 <- cbind(as.data.frame(postOGTT_pre6 [,1]), 
+            sapply(postOGTT_pre6 [,-1], as.numeric))
+colnames(df2)[1] <- "metabolite"
+control_6_countData <- as.data.frame(df2)
+control_6_countData  <- control_6_countData  |> na.omit()
+
+# Differential metabolites
+countData <- as.data.frame(control_6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+res <- results(dds, contrast=c("Site","Convert", "Control"))
+
+# Up-regulated Metabolites
+DEGs_sig_up <- subset(res, pvalue <= 0.05 & log2FoldChange >= 0)
+DEGs_sig_up <- as.data.frame(DEGs_sig_up)
+DEGs_sig_up$metabolite <- rownames(DEGs_sig_up)
+DEGs_sig_up <- DEGs_sig_up |> select("metabolite")
+write_csv(DEGs_sig_up, file = "/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Post_DEM_up.csv")
+
+# Down-regulated Metabolites
+DEGs_sig_down <- subset(res, pvalue <= 0.05 & log2FoldChange <= 0)
+DEGs_sig_down <- as.data.frame(DEGs_sig_down)
+DEGs_sig_down$metabolite  <- rownames(DEGs_sig_down)
+DEGs_sig_down <- DEGs_sig_down |> select("metabolite")
+write_csv(DEGs_sig_down, file = "/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Post_DEM_down.csv")
+
+keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+
+Post6_OGTT <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      labSize = 0,
+                      pointSize = 1.5,
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = FALSE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      caption = NULL,
+                       max.overlaps = 50,
+                      maxoverlapsConnectors =50,
+                      widthConnectors = 0.3, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+Post6_OGTT <- Post6_OGTT + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  geom_point(size = 2, alpha = .9, na.rm = T, shape = 21, colour = "black")
+Post6_OGTT
+# ggsave("Post6_OGTT_Volcano_DEM.png", plot=Post6_OGTT, path=figures, height=5, width=5, units=c("in"), dpi=300)
+
+
+
+
+OGTT_pre_post_volcano <- ggarrange(Pre6_OGTT, 
+                Post6_OGTT + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre3 + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"),
+                Pre0 + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre9_M, 
+                Pre6_M + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre3_M + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"),
+                Pre0_M + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                ncol = 4, nrow = 2, legend = "none", align = "hv")
+OGTT_pre_post_volcano
+# ggsave("OGTT_pre_post_volcano.png", plot=OGTT_pre_post_volcano, path=figures, height=5, width=14, units=c("in"), dpi=300)
+```
+
+
+
+
+
+```{r}
+# Load Pre-OGTT Up and Down
+Pre6_Pre_DEM_down <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Pre_DEM_down.csv")
+Pre6_Pre_DEM_up <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Pre_DEM_up.csv")
+
+# Load Post-OGTT Up and Down
+Pre6_Post_DEM_down <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Post_DEM_down.csv")
+Pre6_Post_DEM_up <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_Post_DEM_up.csv")
+
+
+Pre6_Pre_DEM_down <- as.character(as.data.frame(Pre6_Pre_DEM_down)$metabolite)
+Pre6_Pre_DEM_up <- as.character(as.data.frame(Pre6_Pre_DEM_up)$metabolite)
+
+Pre6_Post_DEM_down <- as.character(as.data.frame(Pre6_Post_DEM_down)$metabolite)
+Pre6_Post_DEM_up <- as.character(as.data.frame(Pre6_Post_DEM_up)$metabolite)
+
+x_up <- list(A = Pre6_Pre_DEM_up, B = Pre6_Post_DEM_up)
+x_down <- list(A = Pre6_Pre_DEM_down, B = Pre6_Post_DEM_down)
+
+VDplot_up <- ggVennDiagram(x_up, lwd = 2, set_color = c("white","white")) + 
+        scale_color_manual(values = c("black","black")) +
+        scale_fill_gradient(low = "#ffffff", high = "#DC0000B2", breaks=c(0,10,20,30,40,50),
+                           limits=c(0,50)) 
+VDplot_up
+ggsave("VD_PrePostOGTT_DEM_up.png", plot=VDplot_up, path = figures, height=3.5, width=3.5, units=c("in"), dpi=300)
+
+VDplot_down  <- ggVennDiagram(x_down, lwd = 2, set_color = c("white","white")) + 
+        scale_color_manual(values = c("black","black")) +
+        scale_fill_gradient(low = "#ffffff", high = "#3C5488B2", breaks=c(0,10,20,30,40,50),
+                           limits=c(0,50)) 
+VDplot_down 
+ggsave("VD_PrePostOGTT_DEM_down.png", plot=VDplot_down, path = figures,  height=3.5, width=3.5, units=c("in"), dpi=300)
+
+
+```
+
+
+
+```{r}
+
+
+
+
+
+
+```
+
+
+`
+

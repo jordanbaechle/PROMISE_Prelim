@@ -1,0 +1,47 @@
+
+
+
+
+
+```{r}
+HOMA_sig <- read_csv("/bigrock/FurmanLab/DataRepository/promise/LASSO/HOMA_signature.csv")
+HOMA_sig <- subset(HOMA_sig, s0 < -2 | s0 > 2)
+
+HOMA_lasso <-  ggplot(HOMA_sig, aes(x=reorder(name, s0), y=s0, label=round(s0, digits = 3))) +
+         theme_pubr()+
+         theme(axis.text=(element_text( size=10))) +
+         geom_bar(aes(fill = s0), color='black', stat="identity") +
+         ylab("Coefficient") + xlab(" ") + 
+         scale_y_continuous(limits=c(-15,15), breaks=seq(-15,15, by = 5)) +
+         geom_hline(yintercept=0, linetype="solid",
+         color = "black", size=0.5) +
+         coord_flip() +
+        scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2")
+HOMA_lasso
+
+
+ISI_sig <- read_csv("/bigrock/FurmanLab/DataRepository/promise/LASSO/ISI_signature.csv")
+ISI_sig <- subset(ISI_sig, s0 < -2 | s0 > 2)
+
+ISI_lasso <-  ggplot(ISI_sig, aes(x=reorder(name, s0), y=s0, label=round(s0, digits = 3))) +
+         theme_pubr()+
+         theme(axis.text=(element_text( size=10))) +
+         geom_bar(aes(fill = s0), color='black', stat="identity") +
+         ylab("Coefficient") + xlab(" ") + 
+         scale_y_continuous(limits=c(-15,15), breaks=seq(-15,15, by = 5)) +
+         geom_hline(yintercept=0, linetype="solid",
+         color = "black", size=0.5) +
+         coord_flip() +
+        scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2")
+ISI_lasso
+```
+
+
+```{r}
+Lasso <- ggarrange(HOMA_lasso, ISI_lasso,
+                ncol = 2, nrow = 1, legend = "none", align = "hv")
+Lasso
+ggsave("HOMA_ISI_lasso.png", plot=Lasso, path=figures, height=5.1, width=9, units=c("in"), dpi=300)
+```
+
+

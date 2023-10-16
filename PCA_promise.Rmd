@@ -1,0 +1,542 @@
+
+
+```{r}
+library(compareGroups)
+library(readxl)
+library(dplyr)
+library(fmsb)
+library(ggradar)
+library(scales)
+library(tidyverse)
+library(factoextra)
+library(janitor)
+library(stats)
+library(FactoMineR)
+files <- "/opt/home/buckcenter.org/jbaechle/promise_project/files"
+```
+
+```{r}
+# T(dx) - 0
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S)
+
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+#Demo <- Demo %>% mutate(across(where(is.numeric), scale))
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+              "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+              "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df <- Demo[1:12, 1:15]
+head(df[, 1:6])
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre0_PCA_OGTT <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre0_PCA_OGTT <- Pre0_PCA_OGTT + scale_x_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre0_PCA_OGTT <- Pre0_PCA_OGTT + scale_y_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre0_PCA_OGTT <- Pre0_PCA_OGTT +theme_minimal()
+Pre0_PCA_OGTT <- Pre0_PCA_OGTT + theme(text=element_text(size=18))
+# png("Pre0_PCA_OGTT.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre0_PCA_OGTT # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 3
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S)
+
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+#Demo <- Demo %>% mutate(across(where(is.numeric), scale))
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+              "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+              "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+              "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),]
+df <- Demo[1:16, 1:15]
+head(df[, 1:6])
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre3_PCA_OGTT <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx - 3 years",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre3_PCA_OGTT <- Pre3_PCA_OGTT + scale_x_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre3_PCA_OGTT <- Pre3_PCA_OGTT + scale_y_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre3_PCA_OGTT <- Pre3_PCA_OGTT +theme_minimal()
+Pre3_PCA_OGTT <- Pre3_PCA_OGTT + theme(text=element_text(size=18))
+# png("PPre3_PCA_OGTT.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre3_PCA_OGTT # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 6
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S)
+
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+#Demo <- Demo %>% mutate(across(where(is.numeric), scale))
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1152.0.Y6", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+              "X1300.0.Y6", "X2070.0.Y3","X1397.0.Y3", "X2261.0.Y3", 
+              "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+              "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+              "X2321.0.Y3", "X2249.0.Y3"),]
+df <- Demo[1:18, 1:15]
+head(df[, 1:6])
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre6_PCA_OGTT <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx - 6 years",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre6_PCA_OGTT <- Pre6_PCA_OGTT + scale_x_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre6_PCA_OGTT <- Pre6_PCA_OGTT + scale_y_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre6_PCA_OGTT <- Pre6_PCA_OGTT +theme_minimal()
+Pre6_PCA_OGTT <- Pre6_PCA_OGTT + theme(text=element_text(size=18))
+# png("Pre6_PCA_OGTT.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre6_PCA_OGTT # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 9
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S)
+
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+#Demo <- Demo %>% mutate(across(where(is.numeric), scale))
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+              "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+              "X2321.0.Y0", "X2249.0.Y0"),]
+df <- Demo[1:10, 1:15]
+head(df[, 1:6])
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre9_PCA_OGTT <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx - 9 years",
+                   repel = TRUE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre9_PCA_OGTT <- Pre9_PCA_OGTT + scale_x_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre9_PCA_OGTT <- Pre9_PCA_OGTT + scale_y_continuous(limits=c(-10, 10), breaks=seq(-10,10,5))
+Pre9_PCA_OGTT <- Pre9_PCA_OGTT +theme_minimal()
+Pre9_PCA_OGTT <- Pre9_PCA_OGTT + theme(text=element_text(size=18))
+# png("Pre9_PCA_OGTT.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre9_PCA_OGTT # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 0 npx
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+
+df$health_status <- c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre0_PCA_npx <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none") + labs(title =NULL)
+Pre0_PCA_npx <- Pre0_PCA_npx + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre0_PCA_npx <- Pre0_PCA_npx + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre0_PCA_npx <- Pre0_PCA_npx +theme_minimal()
+Pre0_PCA_npx <- Pre0_PCA_npx + theme(text=element_text(size=18))
+# png("Pre0_PCA_npx.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre0_PCA_npx # Make plot
+# dev.off()
+```
+
+
+```{r}
+# T(dx) - 0 npx
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),]
+
+df$health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre3_PCA_npx <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre3_PCA_npx <- Pre3_PCA_npx + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre3_PCA_npx <- Pre3_PCA_npx + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre3_PCA_npx <- Pre3_PCA_npx +theme_minimal()
+Pre3_PCA_npx <- Pre3_PCA_npx + theme(text=element_text(size=18))
+# png("Pre0_PCA_npx.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre3_PCA_npx # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 6 npx
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3"),]
+
+df$health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control",
+        "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre6_PCA_npx <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre6_PCA_npx <- Pre6_PCA_npx + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre6_PCA_npx <- Pre6_PCA_npx + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre6_PCA_npx <- Pre6_PCA_npx +theme_minimal()
+Pre6_PCA_npx <- Pre6_PCA_npx + theme(text=element_text(size=18))
+# png("Pre0_PCA_npx.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre6_PCA_npx # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 9 npx
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+
+df$health_status <- c("Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre9_PCA_npx <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre9_PCA_npx <- Pre9_PCA_npx + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre9_PCA_npx <- Pre9_PCA_npx + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre9_PCA_npx <- Pre9_PCA_npx +theme_minimal()
+Pre9_PCA_npx <- Pre9_PCA_npx + theme(text=element_text(size=18))
+# png("Pre0_PCA_npx.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre9_PCA_npx # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 0 metab
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+
+df$health_status <- c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre0_PCA_metab  <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre0_PCA_metab  <- Pre0_PCA_metab  + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre0_PCA_metab  <- Pre0_PCA_metab  + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre0_PCA_metab  <- Pre0_PCA_metab  +theme_minimal()
+Pre0_PCA_metab  <- Pre0_PCA_metab  + theme(text=element_text(size=18))
+# png("Pre0_PCA_metab .png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre0_PCA_metab # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 3 metab
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1131.0.Y0", "X1129.0.Y0", "X1152.0.Y6", "X2220.0.Y6", "X1177.0.Y0", "X2186.0.Y0",
+       "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", "X1397.0.Y6", "X2261.0.Y6",
+       "X2042.0.Y3", "X1249.0.Y3", "X2089.0.Y6", "X2280.0.Y6"),]
+
+df$health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre3_PCA_metab  <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre3_PCA_metab  <- Pre3_PCA_metab  + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre3_PCA_metab  <- Pre3_PCA_metab  + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre3_PCA_metab  <- Pre3_PCA_metab  +theme_minimal()
+Pre3_PCA_metab  <- Pre3_PCA_metab  + theme(text=element_text(size=18))
+# png("Pre3_PCA_metab.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre3_PCA_metab # Make plot
+# dev.off()
+```
+
+
+```{r}
+# T(dx) - 6 metab
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3"),]
+
+df$health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control",
+        "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre6_PCA_metab  <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre6_PCA_metab  <- Pre6_PCA_metab  + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre6_PCA_metab  <- Pre6_PCA_metab  + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre6_PCA_metab  <- Pre6_PCA_metab  +theme_minimal()
+Pre6_PCA_metab  <- Pre6_PCA_metab  + theme(text=element_text(size=18))
+# png("Pre6_PCA_metab.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre6_PCA_metab # Make plot
+# dev.off()
+```
+
+```{r}
+# T(dx) - 9 metab
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+
+df$health_status <- c("Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre9_PCA_metab  <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre9_PCA_metab  <- Pre9_PCA_metab  + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre9_PCA_metab  <- Pre9_PCA_metab  + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre9_PCA_metab  <- Pre9_PCA_metab  +theme_minimal()
+Pre9_PCA_metab  <- Pre9_PCA_metab  + theme(text=element_text(size=18))
+# png("Pre9_PCA_metab.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre9_PCA_metab # Make plot
+# dev.off()
+```
+
+
+
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df <- data.frame(countData)
+rownames(df) <- df[,1]
+
+df <- df[c("X2249.120.Y3", "X2321.120.Y3", "X2280.120.Y3", "X2127.120.Y3",
+       "X2089.120.Y3", "X2099.120.Y3", "X2261.120.Y3", "X1397.120.Y3",
+       "X2070.120.Y3", "X1300.120.Y3", "X2220.120.Y3", "X1152.120.Y3"),]
+
+df$health_status <- c("Control", "Convert", "Control","Convert", 
+                      "Control", "Convert", "Control", "Convert", 
+                      "Control", "Convert", "Control", "Convert")
+
+df <- remove_constant(df, na.rm = TRUE, quiet = TRUE)
+df <- na.omit(df)
+df2 <- df %>%select(-id_sample, -health_status) 
+res.pca <- prcomp(df2, scale = TRUE)
+fviz_eig(res.pca)
+Pre6_OGTT_PCA_metab  <- fviz_pca_ind(res.pca,
+                   geom.ind = "point", 
+                   pointshape = 21, pointsize = 3,
+                   col.ind =  df$health_status, # color by groups
+                   palette = c("#E64B35FF", "#00A087FF"),
+                   addEllipses = TRUE, # Concentration ellipses
+                   ellipse.type = "confidence",
+                   legend.title = "Tdx",
+                   repel = FALSE,
+                   legend.position = "none")  + labs(title =NULL)
+Pre6_OGTT_PCA_metab  <- Pre6_OGTT_PCA_metab + scale_x_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre6_OGTT_PCA_metab  <- Pre6_OGTT_PCA_metab  + scale_y_continuous(limits=c(-100, 100), breaks=seq(-100,100,50))
+Pre6_OGTT_PCA_metab  <- Pre6_OGTT_PCA_metab +theme_minimal()
+Pre6_OGTT_PCA_metab <- Pre6_OGTT_PCA_metab  + theme(text=element_text(size=18))
+# png("Pre9_PCA_metab.png", width = 5.5, height = 4, units = 'in', res = 300)
+Pre6_OGTT_PCA_metab # Make plot
+# dev.off()
+
+
+
+```
+
+
+```{r}
+### Plot all together
+
+Pre_PCA <- ggarrange(     Pre9_radar, Pre6_radar, Pre3_radar,  Pre0_radar,
+                          Pre9_PCA_OGTT, Pre6_PCA_OGTT, Pre3_PCA_OGTT,  Pre0_PCA_OGTT, 
+                          Pre9_PCA_npx, Pre6_PCA_npx, Pre3_PCA_npx,  Pre0_PCA_npx,
+                          Pre9_PCA_metab, Pre6_PCA_metab, Pre3_PCA_metab,  Pre0_PCA_metab,
+                          Pre6_OGTT_PCA_metab, Pre6_OGTT_PCA_metab, Pre6_OGTT_PCA_metab,Pre6_OGTT_PCA_metab,
+                          ncol = 4, nrow = 5, common.legend = TRUE, align = "hv", legend = "none") 
+Pre_PCA
+ggsave("Pre_PCA.png", plot=Pre_PCA, path=figures, height=17, width=18.5, units=c("in"), dpi=300)
+```
+
+
+
+

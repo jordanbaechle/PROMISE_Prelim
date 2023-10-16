@@ -1,0 +1,380 @@
+---
+title: "Proteomics Volcano Plot"
+subtitle: " "
+author:
+- name: "Baechle"
+  url: https://github.com/
+  affiliation: Buck Institute for Research on Aging
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_notebook: default
+  pdf_document: default
+  theme: spacelab
+---
+
+```{r}
+library(gage)
+library(DESeq2)
+library(scales)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(janitor)
+library(clusterProfiler)
+library(DOSE)
+library(dplyr)
+library(gapminder)
+library(tidyverse)
+library(ggsci)
+library(ggthemes)
+library(readxl)
+library(writexl)
+library(EnhancedVolcano)
+library(ggpubr)
+figures <- "/opt/home/buckcenter.org/jbaechle/promise_project/figures"
+```
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+head(df)
+
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+head(df)
+
+pre0_countData <- df |>
+select("protein", 
+      "X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6")
+
+metaData0 <- data.frame (
+      id  = 
+      c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+        "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+        "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control"))
+
+df0 <- cbind(as.data.frame(pre0_countData[,1]), sapply(pre0_countData[,-1], as.numeric))
+colnames(df0)[1] <- "protein"
+pre0_countData <- as.data.frame(df0)
+pre0_countData   <- pre0_countData  |> na.omit()
+
+countData <- as.data.frame(pre0_countData)
+metaData <- as.data.frame(metaData0)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds, contrast=c("Site","Convert", "Control"))
+
+ keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+
+
+Pre0 <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change (NPX)'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      labSize = 0,
+                      pointSize = c(ifelse(abs(res$pvalue) < 0.05, 2, 1.5)),
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = TRUE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      caption = NULL,
+                      # max.overlaps = Inf,
+                      # maxoverlapsConnectors = Inf,
+                      widthConnectors = 0.0, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+# ggsave("Pre0_Volcano_DEP.png", plot=Pre0, path=figures, height=9, width=8, units=c("in"), dpi=300)
+Pre0 <- Pre0 + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05)
+Pre0
+```
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+head(df)
+
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+head(df)
+
+pre3_countData <- df |>
+select("protein", 
+       "X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+       "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+       "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+       "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6")
+
+metaData3 <- data.frame (
+      id  = 
+      c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control"))
+
+df3 <- cbind(as.data.frame(pre3_countData[,1]), sapply(pre3_countData[,-1], as.numeric))
+colnames(df3)[1] <- "protein"
+pre3_countData <- as.data.frame(df3)
+pre3_countData   <- pre3_countData  |> na.omit()
+
+countData <- as.data.frame(pre3_countData)
+metaData <- as.data.frame(metaData3)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds, contrast=c("Site", "Convert", "Control"))
+
+ keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+  
+Pre3 <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change (NPX)'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      labSize = 0,
+                      pointSize = c(ifelse(abs(res$pvalue) < 0.05, 2, 1.5)),
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = TRUE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      # max.overlaps = Inf,
+                      # maxoverlapsConnectors = Inf,
+                      caption = NULL,
+                      widthConnectors = 0.0, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+# ggsave("Pre3_Volcano_DEP.png", plot=Pre3, path=figures, height=9, width=8, units=c("in"), dpi=300)
+Pre3 <- Pre3 + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05)
+Pre3
+```
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+head(df)
+
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+head(df)
+
+pre6_countData <- df |>
+select("protein", 
+       "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+       "X1300.0.Y3", "X2070.0.Y3", "X1397.0.Y3", "X2261.0.Y3", 
+       "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+       "X2321.0.Y3", "X2249.0.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+        "X1300.0.Y3", "X2070.0.Y3", "X1397.0.Y3", "X2261.0.Y3", 
+        "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+        "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+        "X2321.0.Y3", "X2249.0.Y3"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control"))
+
+df6 <- cbind(as.data.frame(pre6_countData[,1]), sapply(pre6_countData[,-1], as.numeric))
+colnames(df6)[1] <- "protein"
+pre6_countData <- as.data.frame(df6)
+pre6_countData   <- pre6_countData  |> na.omit()
+
+countData <- as.data.frame(pre6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds, contrast=c("Site","Convert", "Control"))
+
+
+ keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+  
+Pre6 <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change (NPX)'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      pointSize = c(ifelse(abs(res$pvalue) < 0.05, 2, 1.5)),
+                      labSize = 0,
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = TRUE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      # max.overlaps = Inf,
+                      # maxoverlapsConnectors = Inf,
+                      caption = NULL,
+                      widthConnectors = 0.0, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+# ggsave("Pre6_Volcano_DEP.png", plot=Pre6, path=figures, height=9, width=8, units=c("in"), dpi=300)
+Pre6 <- Pre6 + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05)
+Pre6
+```
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_trans.xlsx")
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 2^df[cols]
+head(df)
+
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "protein"
+df <- as.data.frame(df)
+head(df)
+
+pre9_countData <- df |>
+select("protein", 
+       "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+       "X2321.0.Y0", "X2249.0.Y0")
+
+metaData9 <- data.frame (
+      id  = 
+      c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+        "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+        "X2321.0.Y0", "X2249.0.Y0"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control"))
+
+df9 <- cbind(as.data.frame(pre9_countData[,1]), sapply(pre9_countData[,-1], as.numeric))
+colnames(df9)[1] <- "protein"
+pre9_countData <- as.data.frame(df9)
+pre9_countData   <- pre9_countData  |> na.omit()
+
+countData <- as.data.frame(pre9_countData)
+metaData <- as.data.frame(metaData9)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds, contrast=c("Site","Convert", "Control"))
+
+
+ keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+  
+Pre9 <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change (NPX)'),
+                      pCutoff = 0.05,
+                      labSize = 0,
+                      FCcutoff = 0,
+                      boxedLabels = FALSE,
+                      drawConnectors = TRUE,
+                      arrowheads = FALSE,
+                      pointSize = c(ifelse(abs(res$pvalue) < 0.05, 2, 1.5)),
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      caption = NULL,
+                      # max.overlaps = Inf,
+                      # maxoverlapsConnectors = Inf,
+                      widthConnectors = 0.0, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+# ggsave("Pre9_Volcano_DEP.png", plot=Pre9, path=figures, height=9, width=8, units=c("in"), dpi=300)
+Pre9 <- Pre9 + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  theme(axis.title.y = element_text(vjust = -0.5),
+        axis.title.x = element_text(vjust = +0.5))
+Pre9
+```
+
+
+```{r}
+PM_volcano <- ggarrange(Pre9, 
+                Pre6 + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre3 + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"),
+                Pre0 + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre9_M, 
+                Pre6_M + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre3_M + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"),
+                Pre0_M + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                ncol = 4, nrow = 2, legend = "none", align = "hv")
+PM_volcano
+ggsave("PM_volcano.png", plot=PM_volcano, path=figures, height=5, width=14, units=c("in"), dpi=300)
+```
+

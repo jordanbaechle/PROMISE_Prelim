@@ -1,0 +1,285 @@
+```{r}
+library(compareGroups)
+library(corrr)
+library(dplyr)
+```
+
+
+
+Tdx - 9 years
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S, ALT), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df9_demo<- Demo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+              "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+              "X2321.0.Y0", "X2249.0.Y0"),]
+df9_demo$id <- rownames(df9_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df9_count <- as.data.frame(countData)
+rownames(df9_count) <- df9_count$id_sample
+df9_count<- df9_count[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+df9_count$id <- rownames(df9_count) 
+df9_demo_count <- merge(df9_demo, df9_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df9_metabo <- data.frame(countData)
+rownames(df9_metabo) <- df9_metabo$id_sample 
+df9_metabo <- df9_metabo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+df9_metabo$id <- rownames(df9_metabo) 
+df9_demo_npx_metabo <- merge(df9_demo_count, df9_metabo, by="id")
+
+
+df9_demo_npx_metabo <- df9_demo_npx_metabo %>% 
+  select(Age, BMI, Height, Weight, Waist, Butt, Chol, TAG, HDL, LDL, 
+         ALT, HOMA, ISI, IGIIR, GlucoseAUC, InsulinAUC, ISSI2, Glucose0,
+         Glucose30, Glucose120, Insulin0, Insulin30, Insulin120,
+         Systolic, Diastolic, HOMA2_S, 
+         
+         GRK5, CLEC2L, TTN, NENF, SESTD1, ATP2B4, NOP56, SAT1, PRKAG3, UGDH, 
+         MAPRE3, MORF4L2, SLK, CLASP1, EPN1, CAPN3, GNGT1, NUBP1, REEP4, CABP2,
+         CSDE1, DLG4, TXNL1, GABRA4, BEX3, BRK1, ALDH2, ARHGAP30, SNU13, CACNB1,
+         GAGE2A, RBP1, MTHFD2, SCIN, TDP1, phenylacetate, valylglutamine, beta.sitosterol,
+         acetoacetate, p.cresol.sulfate, anthranilate, X3.indoxyl.sulfate, RNASE3,
+         N.formylanthranilic.acid, CXCL8, tryptophan, erythritol, GSTA1, tyrosine,
+         gamma.glutamylleucine, alanine, N.acetylglutamate, orotate, orotidine,
+         X2.hydroxyoctanoate, pyruvate, dopamine.4.sulfate, CASP3, chenodeoxycholate,
+         alpha.ketobutyrate, maltose, SNAP23, tyramine.O.sulfate, androsterone.glucuronide,
+         biliverdin, gamma.glutamylalanine, X4.hydroxycoumarin, glycoursodeoxycholate,
+         pipecolate, NPL, sedoheptulose, dimethylguanidino.valeric.acid..DMGV..,
+         AKR1B1, DBNL, TALDO1, ENO2, alliin, spermine, CRHR1, N.methyltaurine,
+         S.allylcysteine, SHMT1, YARS1)
+
+tidy_cors <- df9_demo_npx_metabo %>% 
+    correlate() %>% 
+    stretch()
+tidy_cors <- as.data.frame(tidy_cors)
+tidy_cors <- subset(tidy_cors, r < -0.7 | r > 0.7)
+tidy_cors <- tidy_cors %>% distinct(r, .keep_all=TRUE)
+write_csv(tidy_cors, file = "/bigrock/FurmanLab/DataRepository/promise/Misc/corrr_test9.csv")
+```
+
+         UDCA, 'pyruvic acid', 'phenylacetic a.', 'pipecolic acid', sitosterol, 
+         biliverdin, 'anthranilic ac.', guanine, 'p-cresyl aulfa', sedoheptulose,
+         spermine, 'dopamine-4-O-s.', 'indoxyl sulfate', tyrosine, 'N-acetylglutam.',
+         'N-formylanthra', '3-O-methyldopa', 'SNS-314-mesyla.', tryptophan, 'alpha-ketobuty.',
+         'glycochenodeox.', 'alpha-keto-bet.', 'orotic acid', 'gamma-Glu-Ala', alanine,
+         creatine, erythritol, cellulose, orotidine, TMAO
+         
+         
+
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S, ALT), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df6_demo<- Demo[c("X2285.0.Y3", "X2280.0.Y3", "X2261.0.Y3", "X2249.0.Y3", "X2220.0.Y3",
+                        "X2186.0.Y3", "X2089.0.Y3", "X2070.0.Y3", "X1249.0.Y3", "X1075.0.Y3",
+                        "X1129.0.Y3",
+                        
+                        "X1152.0.Y3", "X1266.0.Y0", "X1300.0.Y3", "X1397.0.Y3", "X2042.0.Y0", 
+                        "X2099.0.Y3", "X2127.0.Y3", "X2265.0.Y0", "X2321.0.Y3"),]
+df6_demo$id <- rownames(df6_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df6_count <- as.data.frame(countData)
+rownames(df6_count) <- df6_count$id_sample
+df6_count<- df6_count[c("X2285.0.Y3", "X2280.0.Y3", "X2261.0.Y3", "X2249.0.Y3", "X2220.0.Y3",
+                        "X2186.0.Y3", "X2089.0.Y3", "X2070.0.Y3", "X1249.0.Y3", "X1075.0.Y3",
+                        "X1129.0.Y3",
+                        
+                        "X1152.0.Y3", "X1266.0.Y0", "X1300.0.Y3", "X1397.0.Y3", "X2042.0.Y0", 
+                        "X2099.0.Y3", "X2127.0.Y3", "X2265.0.Y0", "X2321.0.Y3"),]
+df6_count$id <- rownames(df6_count) 
+df6_demo_count <- merge(df6_demo, df6_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df6_metabo <- data.frame(countData)
+rownames(df6_metabo) <- df6_metabo$id_sample 
+df6_metabo <- df6_metabo[c("X2285.0.Y3", "X2280.0.Y3", "X2261.0.Y3", "X2249.0.Y3", "X2220.0.Y3",
+                        "X2186.0.Y3", "X2089.0.Y3", "X2070.0.Y3", "X1249.0.Y3", "X1075.0.Y3",
+                        "X1129.0.Y3",
+                        
+                        "X1152.0.Y3", "X1266.0.Y0", "X1300.0.Y3", "X1397.0.Y3", "X2042.0.Y0", 
+                        "X2099.0.Y3", "X2127.0.Y3", "X2265.0.Y0", "X2321.0.Y3"),]
+df6_metabo$id <- rownames(df6_metabo) 
+df6_demo_npx_metabo <- merge(df6_demo_count, df6_metabo, by="id")
+
+
+df6_demo_npx_metabo <- df6_demo_npx_metabo %>% 
+  select(Age, BMI, Height, Weight, Waist, Butt, Chol, TAG, HDL, LDL, 
+         ALT, HOMA, ISI, IGIIR, GlucoseAUC, InsulinAUC, ISSI2, Glucose0,
+         Glucose30, Glucose120, Insulin0, Insulin30, Insulin120,
+         Systolic, Diastolic, HOMA2_S, 
+         
+         ADRA2A, TXK, PCNA, CACNB1, EPN1, SESTD1, CABP2, NENF, GSTA1, NUBP1,
+         GABRA4, CSDE1, BCAT2, EPO, MORF4L1, UGDH, TXNL1, REEP4, DOK1, PSMC3,
+         RNASEH2A, ARHGAP30, TDP1, TP73, GAGE2A, CLEC2L, MORF4L2, SMS, DLG4,
+         RBP1, CEND1, ARF6, PRKAG3, BRK1, NUDT10, CLASP1, SCIN, BLVRB, FHIT,
+         N.methyltaurine, VAV3, DNAJC9, X12.HETE, MTHFD2, MAP3K5, GRK5, CDC27,
+         DBNL, PTPN1, CRHR1, phenylacetate, GNGT1, WAS, CXCL8, MAP2K6, 
+         thromboxane.B2, VAMP8, CRKL, saccharin, SNAP29, MAPKAPK2, RNASE3, SRC,
+         MAVS, X4.hydroxycoumarin, IRAK1, spermidine, CIAPIN1, valylglutamine,
+         TRIM25, YES1, phytanate, N.carbamoylalanine, pristanate, 
+         phenylalanylglycine, pantoate, X2..deoxyuridine, phosphocholine, SNAP23,
+         malate, uridine, N.acetylneuraminate, AMP, gamma.glutamylleucine,
+         gamma.glutamylvaline, biliverdin, N.alpha.acetylornithine, pipecolate,
+         X2.hydroxyoctanoate, formiminoglutamate, CASP3, alpha.ketobutyrate,
+         etiocholanolone.glucuronide, N.acetylcitrulline, tyramine.O.sulfate,
+         dopamine.3.O.sulfate, dopamine.4.sulfate, pentose.acid., 
+         estrone.3.sulfate, caffeine, sedoheptulose, dimethylguanidino.valeric.acid..DMGV..,
+         taurolithocholate.3.sulfate, glycocholate, X5.acetylamino.6.formylamino.3.methyluracil,
+         gentisate, KHK, beta.sitosterol, GRHPR, taurochenodeoxycholate, SHMT1,
+         ibuprofen, ADH1B, UPB1, TDO2, FTCD, glycoursodeoxycholate, chenodeoxycholate,
+         X7.ketodeoxycholate, salicylate, LCP1)
+
+tidy_cors <- df6_demo_npx_metabo %>% 
+    correlate() %>% 
+    stretch()
+tidy_cors <- as.data.frame(tidy_cors)
+tidy_cors <- subset(tidy_cors, r < -0.7 | r > 0.7)
+tidy_cors <- tidy_cors %>% distinct(r, .keep_all=TRUE)
+write_csv(tidy_cors, file = "/bigrock/FurmanLab/DataRepository/promise/Misc/corrr_test6.csv")
+```
+
+
+
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S, ALT), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df3_demo<- Demo[c("X2285.0.Y6", "X2280.0.Y6", "X2261.0.Y6", "X2186.0.Y6", 
+                        "X2089.0.Y6", "X2070.0.Y6", "X1249.0.Y6", "X1150.0.Y6", 
+                        "X1075.0.Y6",
+                      
+                        "X1177.0.Y0", "X1131.0.Y0", "X1266.0.Y3", "X2042.0.Y3", 
+                        "X2265.0.Y3", "X1152.0.Y6", "X1300.0.Y6", "X1397.0.Y6", 
+                        "X2099.0.Y6", "X2127.0.Y6"),]
+df3_demo$id <- rownames(df3_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df3_count <- as.data.frame(countData)
+rownames(df3_count) <- df3_count$id_sample
+df3_count<- df3_count[c("X2285.0.Y6", "X2280.0.Y6", "X2261.0.Y6", "X2186.0.Y6", 
+                        "X2089.0.Y6", "X2070.0.Y6", "X1249.0.Y6", "X1150.0.Y6", 
+                        "X1075.0.Y6",
+                      
+                        "X1177.0.Y0", "X1131.0.Y0", "X1266.0.Y3", "X2042.0.Y3", 
+                        "X2265.0.Y3", "X1152.0.Y6", "X1300.0.Y6", "X1397.0.Y6", 
+                        "X2099.0.Y6", "X2127.0.Y6"),]
+df3_count$id <- rownames(df3_count) 
+df3_demo_count <- merge(df3_demo, df3_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df3_metabo <- data.frame(countData)
+rownames(df3_metabo) <- df3_metabo$id_sample 
+df3_metabo <- df3_metabo[c("X2285.0.Y6", "X2280.0.Y6", "X2261.0.Y6", "X2186.0.Y6", 
+                        "X2089.0.Y6", "X2070.0.Y6", "X1249.0.Y6", "X1150.0.Y6", 
+                        "X1075.0.Y6",
+                      
+                        "X1177.0.Y0", "X1131.0.Y0", "X1266.0.Y3", "X2042.0.Y3", 
+                        "X2265.0.Y3", "X1152.0.Y6", "X1300.0.Y6", "X1397.0.Y6", 
+                        "X2099.0.Y6", "X2127.0.Y6"),]
+df3_metabo$id <- rownames(df3_metabo) 
+df3_demo_npx_metabo <- merge(df3_demo_count, df3_metabo, by="id")
+
+
+df3_demo_npx_metabo <- df3_demo_npx_metabo %>% 
+  select(Age, BMI, Height, Weight, Waist, Butt, Chol, TAG, HDL, LDL, 
+         ALT, HOMA, ISI, IGIIR, GlucoseAUC, InsulinAUC, ISSI2, Glucose0,
+         Glucose30, Glucose120, Insulin0, Insulin30, Insulin120,
+         Systolic, Diastolic, HOMA2_S, 
+         
+        RNASE3, GRK5, CCNE1, LYPLA2, KCNIP4, SAT2, RICTOR, cholate, REST, CEND1,
+        NUBP1, MTHFD2, RBP1, GAGE2A, delta.tocopherol, phenol.sulfate, deoxycholate,
+        glycolithocholate, X4.hydroxycoumarin, glycodeoxycholate, AMP, tyramine.O.sulfate,
+        formiminoglutamate, X3beta.hydroxy.5.cholenoate, cystathionine, phosphocholine, 
+        histidine, phenylalanine, leucine, maleate, orotidine, biliverdin, 
+        gamma.glutamylleucine, N.alpha.acetylornithine, trans.urocanate, spermine, 
+        gamma.glutamylvaline, N.carbamoylalanine, SNAP23, pantoate, CXCL8, sucrose,
+        phenylalanylglycine, GSTA1, pentose.acid., theophylline, X7.methylurate,
+        heme, cysteine.s.sulfate, X3.methylxanthine, paraxanthine, 
+        X7.methylxanthine, theobromine, EIF4E, CRHR1, SNCG, isoursodeoxycholate,
+        N.methyltaurine, GHRHR, OXT, salicylate, LYPLA2)
+
+tidy_cors <- df3_demo_npx_metabo %>% 
+    correlate() %>% 
+    stretch()
+tidy_cors <- as.data.frame(tidy_cors)
+tidy_cors <- subset(tidy_cors, r < -0.7 | r > 0.7)
+tidy_cors <- tidy_cors %>% distinct(r, .keep_all=TRUE)
+write_csv(tidy_cors, file = "/bigrock/FurmanLab/DataRepository/promise/Misc/corrr_test3.csv")
+```
+
+
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% mutate(across(c(HOMA,	ISI,	IGIIR,	GlucoseAUC,	InsulinAUC,	ISSI2,	Glucose0,	Glucose30,	Glucose120,	Insulin0,	Insulin30,	Insulin120,	HOMA2_S, ALT), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df0_demo<- Demo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df0_demo$id <- rownames(df0_demo) 
+
+# Proteins
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+df0_count <- as.data.frame(countData)
+rownames(df0_count) <- df0_count$id_sample
+df0_count<- df0_count[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df0_count$id <- rownames(df0_count) 
+df0_demo_count <- merge(df0_demo, df0_count, by="id")
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all.xlsx")
+df0_metabo <- data.frame(countData)
+rownames(df0_metabo) <- df0_metabo$id_sample 
+df0_metabo <- df0_metabo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+df0_metabo$id <- rownames(df0_metabo) 
+df0_demo_npx_metabo <- merge(df0_demo_count, df0_metabo, by="id")
+
+
+df0_demo_npx_metabo <- df0_demo_npx_metabo %>% 
+  select(Age, BMI, Height, Weight, Waist, Butt, Chol, TAG, HDL, LDL, 
+         ALT, HOMA, ISI, IGIIR, GlucoseAUC, InsulinAUC, ISSI2, Glucose0,
+         Glucose30, Glucose120, Insulin0, Insulin30, Insulin120,
+         Systolic, Diastolic, HOMA2_S, 
+         
+        LYPLA2, GRK5, CCNE1, REST, KCNIP4, CRHR1, X4.hydroxycoumarin,
+         taurodeoxycholate, glycolithocholate, S.methylmethionine, glycodeoxycholate,
+         N.methyltaurine, pantoate, tauro.beta.muricholate, serotonin, CXCL8, phytanate,
+         pristanate, gentisate, SNAP23, X3beta.hydroxy.5.cholenoate, methionine, GSTA1,
+         uridine, betaine, xanthine,fructose, allantoin, gluconate, N.acetylglutamate,
+         CASP3, maleate, X3.aminoisobutyrate, orotidine, X3.methylglutaconate, 
+         X3.hydroxy.3.methylglutarate, pyruvate, RNASE3, heme, MPO, delta.tocopherol,
+         tauroursodeoxycholate, glycoursodeoxycholate, SNCG, isoursodeoxycholate,
+         ADRA2A, salicylate)
+
+tidy_cors <- df0_demo_npx_metabo %>% 
+    correlate() %>% 
+    stretch()
+tidy_cors <- as.data.frame(tidy_cors)
+tidy_cors <- subset(tidy_cors, r < -0.7 | r > 0.7)
+tidy_cors <- tidy_cors %>% distinct(r, .keep_all=TRUE)
+write_csv(tidy_cors, file = "/bigrock/FurmanLab/DataRepository/promise/Misc/corrr_test0.csv")
+```
+

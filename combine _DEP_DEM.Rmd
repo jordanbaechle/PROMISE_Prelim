@@ -1,0 +1,29 @@
+
+
+```{r}
+Pre0_DEP_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre0_DEP_all.csv")
+Pre0_DEM_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre0_DEM_all.csv")
+Pre0_DEP_DEM_all <- rbind(Pre0_DEP_all, Pre0_DEM_all)
+write_csv(Pre0_DEP_DEM_all, 
+          file = "/bigrock/FurmanLab/DataRepository/promise/cytoscape/Pre0_DEP_DEM_all.csv")
+
+Pre3_DEP_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre3_DEP_all.csv")
+Pre3_DEM_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre3_DEM_all.csv")
+Pre3_DEP_DEM_all <- rbind(Pre3_DEP_all, Pre3_DEM_all)
+write_csv(Pre3_DEP_DEM_all, 
+          file = "/bigrock/FurmanLab/DataRepository/promise/cytoscape/Pre3_DEP_DEM_all.csv")
+
+Pre6_DEP_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre6_DEP_all.csv")
+Pre6_DEM_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_DEM_all.csv")
+Pre6_DEP_DEM_all <- rbind(Pre6_DEP_all, Pre6_DEM_all)
+write_csv(Pre6_DEP_DEM_all, 
+          file = "/bigrock/FurmanLab/DataRepository/promise/cytoscape/Pre6_DEP_DEM_all.csv")
+
+Pre9_DEP_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre9_DEP_all.csv")
+Pre9_DEM_all <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre9_DEM_all.csv")
+Pre9_DEP_DEM_all <- rbind(Pre9_DEP_all, Pre9_DEM_all)
+write_csv(Pre9_DEP_DEM_all, 
+          file = "/bigrock/FurmanLab/DataRepository/promise/cytoscape/Pre9_DEP_DEM_all.csv")
+
+```
+

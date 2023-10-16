@@ -1,0 +1,206 @@
+---
+title: "Proteomics Pathway Analysis"
+subtitle: " "
+author:
+- name: "Baechle"
+  url: https://github.com/
+  affiliation: Buck Institute for Research on Aging
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_notebook: default
+  pdf_document: default
+  theme: spacelab
+---
+
+### Packages
+```{r}
+library(gage)
+library(DESeq2)
+library(scales)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(janitor)
+library(clusterProfiler)
+library(DOSE)
+library(dplyr)
+library(gapminder)
+library(tidyverse)
+library(ggsci)
+library(ggthemes)
+figures <- "/opt/home/buckcenter.org/jbaechle/promise_project/figures"
+
+# set up KEGG database
+kg.hsa <- kegg.gsets(species="hsa")
+kegg.sigmet.gs <- kg.hsa$kg.sets[kg.hsa$sigmet.idx]
+kegg.dise.gs <- kg.hsa$kg.sets[kg.hsa$dise.idx]
+
+
+### set up GO database
+go.hs <- go.gsets(species="human")
+go.bp.gs <- go.hs$go.sets[go.hs$go.subs$BP]
+go.mf.gs <- go.hs$go.sets[go.hs$go.subs$MF]
+go.cc.gs <- go.hs$go.sets[go.hs$go.subs$CC]
+```
+
+## Load data
+### TDx - 3
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre3_NPX_integer_fm.xlsx")
+metaData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre3_NPX_dm.xlsx")
+```
+
+### TDx - 6
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre6_NPX_integer_fm.xlsx")
+metaData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre6_NPX_dm.xlsx")
+```
+
+### TDx - 9
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre9_NPX_integer_fm.xlsx")
+metaData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre9_NPX_dm.xlsx")
+```
+
+### Differential Expression
+```{r}
+countData <- as.data.frame(countData)
+metaData <- as.data.frame(metaData)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+DEGs <- results(dds, contrast=c("Site","Convert", "Control"))
+DEGs <- subset(DEGs, pvalue <= 0.2)
+DEGs$symbol <- mapIds(org.Hs.eg.db, keys=row.names(DEGs), column="SYMBOL", keytype="SYMBOL", multiVals="first")
+DEGs$entrez <- mapIds(org.Hs.eg.db, keys=row.names(DEGs), column="ENTREZID", keytype="SYMBOL", multiVals="first")
+DEGs$name <- mapIds(org.Hs.eg.db, keys=row.names(DEGs), column="GENENAME", keytype="SYMBOL", multiVals="first")
+DEGs.fc <- DEGs$log2FoldChange
+names(DEGs.fc) <- DEGs$entrez
+
+### Enrichment analysis on all (+/-) log fc
+fc.kegg.sigmet.p <- gage(DEGs.fc, gsets = kegg.sigmet.gs)
+fc.kegg.dise.p <- gage(DEGs.fc, gsets = kegg.dise.gs)
+fc.go.bp.p <- gage(DEGs.fc, gsets = go.bp.gs)
+fc.go.mf.p <- gage(DEGs.fc, gsets = go.mf.gs)
+fc.go.cc.p <- gage(DEGs.fc, gsets = go.cc.gs)
+
+### covert the KEGG results to data frames
+fc.kegg.sigmet.p.up <- as.data.frame(fc.kegg.sigmet.p$greater)
+fc.kegg.dise.p.up <- as.data.frame(fc.kegg.dise.p$greater)
+fc.kegg.sigmet.p.down <- as.data.frame(fc.kegg.sigmet.p$less)
+fc.kegg.dise.p.down <- as.data.frame(fc.kegg.dise.p$less)
+
+df2_up <-top_n(df2_up, -20, stat.mean)
+df2_up <-top_n(df2_up, -20, stat.mean)
+
+### convert the GO results to data frames
+fc.go.bp.p.up <- as.data.frame(fc.go.bp.p$greater)
+fc.go.mf.p.up <- as.data.frame(fc.go.mf.p$greater)
+fc.go.cc.p.up <- as.data.frame(fc.go.cc.p$greater)
+fc.go.bp.p.down <- as.data.frame(fc.go.bp.p$less)
+fc.go.mf.p.down <- as.data.frame(fc.go.mf.p$less)
+fc.go.cc.p.down <- as.data.frame(fc.go.cc.p$less)
+
+### Annotate Top Up-regulated and Down-regulated Pathwways
+df <- data.frame(DEGs)
+df$GO<- mapIds(org.Hs.eg.db, keys=row.names(df), column="GO", keytype="SYMBOL", multiVals="first")
+df <- subset(df, pvalue<0.1)
+df_up <- subset(df, log2FoldChange > 0)
+df_down <- subset(df, log2FoldChange < 0)
+```
+
+```{r}
+gene.df_up <- bitr(df_up$entrez, fromType = "ENTREZID", toType = c("ENSEMBL", "SYMBOL"), OrgDb = org.Hs.eg.db)
+gene.df_up <- gene.df_up %>% distinct(ENTREZID, SYMBOL, .keep_all = TRUE)
+kk <- enrichKEGG(gene         = gene.df_up$ENTREZID,
+                 organism     = 'hsa',
+                 pvalueCutoff  = 0.1)
+head(kk)
+```
+
+
+
+
+```{r}
+### Up-regulated Pathways
+gene.df_up <- bitr(df_up$entrez, fromType = "ENTREZID", toType = c("ENSEMBL", "SYMBOL"), OrgDb = org.Hs.eg.db)
+gene.df_up <- gene.df_up %>% distinct(ENTREZID, SYMBOL, .keep_all = TRUE)
+ego_up <- enrichGO(gene = gene.df_up$ENSEMBL,
+                 OrgDb = org.Hs.eg.db,
+                 keyType = 'ENSEMBL',
+                 ont = "ALL",
+                 pAdjustMethod = "BH",
+                 pvalueCutoff  = 0.05,
+                 qvalueCutoff  = 0.10)
+ego_up <- setReadable(ego_up, OrgDb = org.Hs.eg.db)
+df2_up <- as.data.frame(ego_up)
+df2_up <-top_n(df2_up, -5, pvalue)
+df2_up$GeneRatio <- parse_ratio(df2_up$GeneRatio)
+head(df2_up)
+#write_xlsx(df2_up, "CM_pathway_up.xlsx")
+
+### Down-regulated Pathways
+gene.df_down <- bitr(df_down$entrez, fromType = "ENTREZID", toType = c("ENSEMBL", "SYMBOL"), OrgDb = org.Hs.eg.db)
+gene.df_down <- gene.df_down %>% distinct(ENTREZID, SYMBOL, .keep_all = TRUE)
+ego_down <- enrichGO(gene = gene.df_down$ENSEMBL,
+                 OrgDb = org.Hs.eg.db,
+                 keyType = 'ENSEMBL',
+                 ont = "ALL",
+                 pAdjustMethod = "BH",
+                 pvalueCutoff  = 0.05,
+                 qvalueCutoff  = 0.10)
+ego_down <- setReadable(ego_down, OrgDb = org.Hs.eg.db)
+df2_down <- as.data.frame(ego_down)
+df2_down <-top_n(df2_down, -5, pvalue)
+df2_down$GeneRatio <- parse_ratio(df2_down$GeneRatio)
+head(df2_down)
+#write_xlsx(df2_down, "CM_pathway_down.xlsx")
+
+
+### Combine Up and Down-regulated Pathways
+df2_down$GeneRatio <- df2_down$GeneRatio*(-1)
+pathway <- rbind(df2_up, df2_down)
+head(pathway)
+pal_npg(palette = c("nrc"), alpha = 1)
+color <- ifelse(pathway$GeneRatio >= 0, "#3C5488B2", "#DC0000B2")
+```
+
+## Plot
+### TDx - 3
+```{r}
+pre3_pathway_bar <- ggplot(data = pathway,
+           aes(x = reorder(Description, GeneRatio), y = GeneRatio, alpha = pvalue)) +
+  geom_bar(stat = "identity",
+           show.legend = TRUE,
+           aes(fill = color), # Background color
+           color = "black") + # Border color
+  coord_flip() +
+  labs(y = "Signature Enrichment", x = " ",
+       title = " ",
+       subtitles = " ")+
+  geom_hline(yintercept = 0, color = 1, lwd = 1) +
+  theme_minimal() +
+  scale_y_continuous(limits=c(-0.5,0.5), breaks=seq(-0.5,0.5,0.25)) +
+  theme(text=element_text(size=18)) +  scale_alpha(trans = reverse_trans())  + scale_fill_npg()
+pre3_pathway_bar
+# ggsave("pre3_pathway_bar.png", plot=pre3_pathway_bar, path = figures, height=9, width=16, units=c("in"), dpi=300)
+```
+
+### CMEC Pathways
+```{r}
+CMEC_pathway_bar <- ggplot(data = pathway,
+           aes(x = reorder(Description, GeneRatio), y = GeneRatio, alpha = pvalue))+
+  geom_bar(stat = "identity",
+           show.legend = TRUE,
+           aes(fill = color), # Background color
+           color = "black") + # Border color
+  coord_flip()+
+  labs(y = "Signature Enrichment", x = " ",
+       title = " ",
+       subtitles = " ")+
+  geom_hline(yintercept = 0, color = 1, lwd = 1) +
+  theme_minimal() +
+  scale_y_continuous(limits=c(-0.08,0.08), breaks=seq(-0.08,0.08,0.02)) +
+  theme(text=element_text(size=18))  +  scale_alpha(trans = reverse_trans()) + scale_fill_npg()
+CMEC_pathway_bar
+ggsave("CMEC_Pathway_Barplot.png", plot=CMEC_pathway_bar, path = figures, height=9, width=16, units=c("in"), dpi=300)
+```

@@ -1,0 +1,71 @@
+
+
+```{r}
+library(ggplot2)
+df <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre0369_PM_promise.xlsx")
+
+colors = c("#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", 
+           "#911eb4", "#46f0f0", "#f032e6", "#bcf60c", "#fabebe", 
+           "#008080", "#e6beff", "#9a6324", "#fffac8")
+
+ggplot(data=df, aes(x=time, y = impact, colour = Pathway)) +
+   geom_smooth(method = "loess",
+              se = FALSE,
+              formula = 'y ~ x') +
+  labs(title = " ") +
+  theme_minimal() +
+  scale_color_manual(values=colors) +
+   geom_labelsmooth(aes(
+    x = time, y = impact, group = Pathway, colour = Pathway, label = Pathway
+  ),
+  hjust = .5
+  ) +
+  theme(legend.position = "none")
+  
+  
+  
+  geom_text(data = df %>% filter(time == last(time)), aes(label = Pathway, 
+                                                           x = time + 0.5, 
+                                                           y = impact, 
+                                                           color = Pathway)) + 
+          guides(color = FALSE) + theme_bw() + 
+          scale_x_continuous(breaks = scales::pretty_breaks(9))
+```
+
+
+
+
+
+
+
+```{r}
+library(ggplot2)
+df <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre0369_PM_promise.xlsx")
+
+ggplot(df, aes(x = time, y = impact, group=Pathway, color=Pathway)) +
+  geom_smooth(method = "loess",
+              se = FALSE,
+              formula = 'y ~ x',
+              span = 0.8) +
+  stat_smooth(se=FALSE, geom="area",
+              method = 'loess', alpha=.5,
+              span = 0.8,aes(fill=Pathway)) + 
+  theme_minimal() + scale_fill_npg() + scale_color_npg()
+```
+ggplot(df, aes(time, impact, pathway)) + 
+  geom_area(data = df, fill = "#80C020", alpha = 0.35) + 
+  geom_line(data = df, colour = "#80C020", size = 1.2) +
+  geom_point(shape = 16, size = 4.5, colour = "#80C020") +
+  geom_point(shape = 16, size = 2.5, colour = "white") +
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.border       = element_blank(),
+        axis.line.x        = element_line(),
+        text               = element_text(size = 15),
+        plot.margin        = margin(unit(c(20, 20, 20, 20), "pt")),
+        axis.ticks         = element_blank(),
+        axis.text.y        = element_text(margin = margin(0,15,0,0, unit = "pt"))) +
+  scale_alpha_identity() + labs(x="",y="") 
+

@@ -1,0 +1,257 @@
+
+```{r}
+library(ggplot2)
+library(ggtern)
+```
+
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Dietary_intervention_diet.xlsx")
+data_MET <- subset(data, Diet == "MED diet")
+theme_set(theme_bw())
+triangle <- data_MET %>%
+  ggtern(aes(
+    x = Lipids,
+    y = Carbohydrates,
+    z = Proteins,
+    fill = Daily_caloric_target,
+    shape = Time_point)) +
+  geom_point(color="black", size=3) +
+  theme_showarrows() +
+  theme_showgrid() +
+    ggtitle("Mediterranean Diet") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
+    labs(yarrow = "Carbohydrates (%)",
+       zarrow = "Protein (%)",
+       xarrow = "Fat (%)") +
+       scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2", 
+                            midpoint = 100, limits = c(50, 150), name="% Daily\nCaloric Target") +
+      scale_shape_manual(values = c(21:22), name = "Time Point") + 
+      scale_T_continuous(limits=c(0,1),
+                     breaks=seq(0,1,by=0.25)) +
+      scale_L_continuous(limits=c(0,1),
+                     breaks=seq(0,1,by=0.25)) +
+      scale_R_continuous(limits=c(0,1),
+                     breaks=seq(0,1,by=0.25))
+triangle + theme_showgrid()
+ggsave("Met_triangle_dietary.png", plot=triangle, path=figures, height=6.7, width=7, units=c("in"), dpi=300)
+```
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Dietary_intervention_diet.xlsx")
+data_PTT <- subset(data, Diet == "PPT diet")
+theme_set(theme_bw())
+triangle <- data_PTT %>%
+  ggtern(aes(
+    x = Lipids,
+    y = Carbohydrates,
+    z = Proteins,
+    fill = Daily_caloric_target,
+    shape = Time_point,
+    group = ID)) +
+  geom_point(color="black", size=3)  +
+  theme_showarrows() +
+  theme_showgrid() +
+  ggtitle("Personalized Post-prandial Diet") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
+    labs(yarrow = "Carbohydrates (%)",
+       zarrow = "Protein (%)",
+       xarrow = "Fat (%)") +
+       scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2", 
+                            midpoint = 100, limits = c(50, 150), name="% Daily\nCaloric Target") +
+      scale_shape_manual(values = c(21:22), name = "Time Point") + 
+      scale_T_continuous(limits=c(0,1),
+                     breaks=seq(0,1,by=0.25)) +
+      scale_L_continuous(limits=c(0,1),
+                     breaks=seq(0,1,by=0.25)) +
+      scale_R_continuous(limits=c(0,1),
+                     breaks=seq(0,1,by=0.25))
+triangle + theme_showgrid()
+ggsave("Ppt_triangle_dietary.png", plot=triangle, path=figures, height=6.7, width=7, units=c("in"), dpi=300)
+```
+
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Diet_microbiome_bileacids.xlsx")
+
+
+R_gnavus_GUDCA_corr <- ggplot(data, aes(C_aerofaciens, glycoursodeoxycholate)) + 
+                  geom_point(size = 2, alpha = 0.6, shape=21, stroke = .7, color='black', fill='#F39B7FFF')  +
+                  stat_poly_line(method=lm, color="black", fill="#7E6148B2", size=2.75) +
+                  stat_poly_eq(use_label(c("R2", "p"))) +
+                  theme_pubr() +
+                  theme(
+                         axis.title.y = element_text(vjust = +1)) +
+                         ylab(  c("glycoursodeoxycholate")  )  +
+                         xlab(  c("R_gnavus")  )  +
+                         rremove("legend.title")+
+                         font("xylab",size=18)+  
+                         font("xy",size=18)+ 
+                         font("xy.text", size = 18) +  
+                         font("legend.text",size = 18) +
+                         scale_y_continuous(limits=c(-5,7.5), breaks=seq(-5,5, by = 2.5)) + 
+                         scale_x_continuous(limits=c(-5,5), breaks=seq(-5,5, by = 2.5)) +
+                         scale_fill_npg() + scale_color_npg() +
+                         guides(fill = guide_legend(override.aes = list(alpha = 1,color="black")))
+R_gnavus_GUDCA_corr
+
+
+
+
+
+```
+
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Diet_microbiome_bileacids.xlsx")
+data <- subset(data, Diet == "PPT diet")
+my_comparisons <- list( c('Pre-intervention', 'Post-intervention'))
+data$Time_Point = factor(data$Time_Point, levels = c('Pre-intervention', 'Post-intervention'))
+
+TDCA_3_S <- ggplot(data = data, aes(x = Time_Point, y = data$'taurodeoxycholic acid 3-sulfate', fill = Time_Point))+
+       geom_violin(alpha=0.65, position = position_dodge(width = .8),size=1,color=NA) +
+       geom_boxplot(outlier.size = -1, color="black",lwd=0.7,position = position_dodge(width = .8),  alpha = 0.7,show.legend = F)+
+       #geom_point( shape = 21,size=2, position = position_jitterdodge(), color="black",alpha=1) +
+       geom_quasirandom(shape = 21, size=1.5, dodge.width = .8, alpha=.7,show.legend = F) +
+       theme_pubr() +
+       theme(
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       axis.text.x = element_text(angle = 45, hjust=1)) +
+       ylab(  c(" ")  )  +
+       xlab(  c(" ")  )  +
+       ggtitle("taurodeoxycholic acid 3-sulfate\n(TDCA 3-S)") +
+       rremove("legend.title")+
+       font("xylab",size=18)+  
+       font("xy",size=18)+ 
+       font("xy.text", size = 18) +  
+       font("legend.text",size = 18) +
+       scale_y_continuous(limits=c(-2.5,6.5), breaks=seq(-2.5,5, by = 2.5)) + 
+       scale_fill_npg() + 
+       scale_x_discrete(limits = c("Pre-intervention", "Post-intervention")) +
+       stat_compare_means(comparisons = my_comparisons,
+                          method = "t.test",
+                          label.y = c(5.5),
+                          label = "p.signif",
+                           vjust = 0) +
+       scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+     #   scale_fill_manual(values=c("#8491B4FF", "#91D1C2FF")) +
+       guides(fill = FALSE)
+TDCA_3_S
+
+
+
+
+TDCA_3_S <- ggplot(data = data, aes(x = Time_Point, y = data$'taurodeoxycholic acid 3-sulfate', fill = Time_Point))+
+       geom_violin(alpha=0.65, position = position_dodge(width = .8),size=1,color=NA) +
+       geom_boxplot(outlier.size = -1, color="black",lwd=0.7,position = position_dodge(width = .8),  alpha = 0.7,show.legend = F)+
+       #geom_point( shape = 21,size=2, position = position_jitterdodge(), color="black",alpha=1) +
+       geom_quasirandom(shape = 21, size=1.5, dodge.width = .8, alpha=.7,show.legend = F) +
+       theme_pubr() +
+       theme(
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       axis.text.x = element_text(angle = 45, hjust=1)) +
+       ylab(  c(" ")  )  +
+       xlab(  c(" ")  )  +
+       ggtitle("taurodeoxycholic acid 3-sulfate\n(TDCA 3-S)") +
+       rremove("legend.title")+
+       font("xylab",size=18)+  
+       font("xy",size=18)+ 
+       font("xy.text", size = 18) +  
+       font("legend.text",size = 18) +
+       scale_y_continuous(limits=c(-2.5,6.5), breaks=seq(-2.5,5, by = 2.5)) + 
+       scale_fill_npg() + 
+       scale_x_discrete(limits = c("Pre-intervention", "Post-intervention")) +
+       stat_compare_means(comparisons = my_comparisons,
+                          method = "t.test",
+                          label.y = c(5.5),
+                          label = "p.signif",
+                           vjust = 0) +
+       scale_fill_manual(values=c("#E64B35FF", "#00A087FF")) +
+     #   scale_fill_manual(values=c("#8491B4FF", "#91D1C2FF")) +
+       guides(fill = FALSE)
+TDCA_3_S
+```
+
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Diet_microbiome_bileacids.xlsx")
+data <- subset(data, Diet == "PPT diet")
+createTable(compareGroups(Time_Point ~ . - ID, data=data))
+```
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Diet_microbiome_bileacids.xlsx")
+data <- subset(data, Diet == "MED diet")
+compareGroups(Time_Point ~ . - ID, data=data)
+```
+
+
+
+
+my_comparisons <- list( c("Stage I", "Stage II"), 
+                        c("Stage I", 'Stage III'),
+                        c("Stage I", 'Stage IV'),
+                        c("Stage II", "Stage III"), 
+                        c("Stage III", 'Stage IV'))
+merged$Disease_Stage = factor(merged$Disease_Stage, levels = c('Stage I', 'Stage II', 'Stage III', 'Stage IV'))
+TFRC_Stage <- ggplot(data = merged, aes(x = Disease_Stage, y = TFRC, fill = Disease_Stage))+
+       geom_violin(alpha=0.65, position = position_dodge(width = .8),size=1,color=NA) +
+       geom_boxplot(outlier.size = -1, color="black",lwd=0.7,position = position_dodge(width = .8),  alpha = 0.7,show.legend = F)+
+       #geom_point( shape = 21,size=2, position = position_jitterdodge(), color="black",alpha=1) +
+       geom_quasirandom(shape = 21, size=1.5, dodge.width = .8, alpha=.7,show.legend = F) +
+       theme_pubr() +
+       theme(
+       axis.title.y = element_text(vjust = +1),
+       axis.text.x = element_text(angle = 45, hjust=1)) +
+       ylab(  c("TFRC mRNA (z score)")  )  +
+       xlab(  c(" ")  )  +
+       rremove("legend.title")+
+       font("xylab",size=18)+  
+       font("xy",size=18)+ 
+       font("xy.text", size = 18) +  
+       font("legend.text",size = 18) +
+       scale_y_continuous(limits=c(-5,7.5), breaks=seq(-5,5, by = 2.5)) + 
+       scale_fill_npg() + 
+       stat_compare_means(comparisons = my_comparisons,
+                          method = "t.test",
+                          label.y = c(3, 4, 5, 6, 7),
+                          label = "p.signif",
+                           vjust = 0) +
+       stat_compare_means(method = "anova",
+                          label.y = 7) +
+       guides(fill = guide_legend(override.aes = list(alpha = 1,color="black")))
+TFRC_Stage
+
+
+
+
+
+data <- data %>% 
+        mutatate( Time_Point = recode(Time_Point, 
+                          "Pre-intervention" = "Pre-PPT",
+                          "Post-intervention" = "Post-PPT") )
+
+
+```{r}
+data <- read_excel("/bigrock/FurmanLab/DataRepository/promise/external/Dietary_intervention_diet.xlsx")
+theme_set(theme_bw())
+triangle <- data %>%
+  ggtern(aes(
+    x = Proteins,
+    y = Carbohydrates,
+    z = Lipids,
+    color = Daily_caloric_target
+  )) +
+  stat_density_tern(geom = 'polygon',
+                         n         = 400,
+                         aes(fill  = ..level..,
+                             alpha = ..level..)) +
+  theme_showarrows() +
+    labs(yarrow = "Carbohydrates (%)",
+       zarrow = "Lipids (%)", 
+       xarrow = "Proteins (%)") 
+triangle
+# ggsave("triangle_dietary.png", plot=triangle, path=figures, height=8, width=8, units=c("in"), dpi=300)
+```

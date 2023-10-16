@@ -1,0 +1,155 @@
+```{r}
+library(dplyr)
+library(readxl)
+library(scales)
+library(ggplot2)
+set.seed(1994)
+```
+
+
+
+```{r}
+#Scatter Plot 1 (All)
+Demo$DM <- as.factor(Demo$DM)
+p <- ggplot(data = Demo, aes(x = ISI, y = HOMA)) +
+    geom_point(aes(x = ISI, y = HOMA, fill = DM),
+                   size=2.5, shape=21, stroke=1, alpha=0.80) +
+    geom_smooth(
+        method = 'glm', 
+        formula = y ~ x, 
+        method.args = list(family = gaussian(link = 'log'))
+    ) + 
+# stat_poly_eq(formula = my.formula, 
+#               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+#               parse = TRUE) +         
+  
+  labs(x = 'ISI', y = 'HOMA')+ theme(text=element_text(size=20)) +
+  scale_x_continuous(limits=c(0,100), breaks=seq(0,100, by = 25)) +
+  scale_y_continuous(limits=c(0,150), breaks=seq(0,150, by = 25)) +
+  theme_pubr() +  scale_fill_manual(values=c("#00A087FF", "#E64B35FF"))
+p
+#ggsave("my_graph_abc.png", plot=p, height=4, width=4.5, units=c("in"), dpi=300)
+```
+
+
+
+
+
+
+
+
+```{r}
+promise_meta <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_meta.xlsx")
+#Line graph 1 Leptin by Age
+stanford_1kip$GENDER <- as.factor(stanford_1kip$GENDER)
+stanford_1kip$Leptin <- stanford_1kip$LEPTIN/1000
+tgc <- summarySE(stanford_1kip, measurevar="Leptin", groupvars=c("GENDER2","Age"))
+pd <- position_dodge(0.1) # move them .05 to the left and right
+A<- ggplot(tgc, aes(x=Age, y=Leptin, colour=GENDER2)) + 
+  geom_errorbar(aes(ymin=Leptin-ci, ymax=Leptin+ci), colour="black", width=.1, position=pd) +
+  geom_line(position=pd) +
+  geom_point(position=pd, size=3, shape=21, fill="white")
+A<- A + scale_x_discrete(limits=c("<20", "20-29","30-39","40-49","50-59","60-69","70-80",">80"))
+A<-A+ labs(x = 'Age (years)', y = 'Leptin (ng/mL)')+ theme(text=element_text(size=20))
+A<-A +ylim(-2, 6)
+A <- A +theme_minimal()
+A<-A+theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1),text=element_text(family="Helvetica",size=20, color="black"))
+```
+
+
+
+
+
+
+```{r}
+# pre- 0-3-6-9 
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose, -IGFBP1)
+
+df <- df[c(
+        "X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+        "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+        "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6",
+        
+        "X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6",
+        
+        "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+        "X1300.0.Y3", "X2070.0.Y3", "X1397.0.Y3", "X2261.0.Y3", 
+        "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+        "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+        "X2321.0.Y3", "X2249.0.Y3",
+       
+        "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+        "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+        "X2321.0.Y0", "X2249.0.Y0"),]
+
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+Demo <- Demo |> select(chenodeoxycholate)
+
+UDCA <- Demo[c(
+        "X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+        "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+        "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6",
+  
+        "X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6",
+        
+        "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+        "X1300.0.Y3", "X2070.0.Y3", "X1397.0.Y3", "X2261.0.Y3", 
+        "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+        "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+        "X2321.0.Y3", "X2249.0.Y3",
+       
+        "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+        "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+        "X2321.0.Y0", "X2249.0.Y0"),]
+
+
+HOMA[is.na(HOMA)] <- mean(HOMA, na.rm = TRUE)
+```
+
+
+
+```{r}
+#Line graph 1 Leptin by Age
+stanford_1kip$GENDER <- as.factor(stanford_1kip$GENDER)
+stanford_1kip$Leptin <- stanford_1kip$LEPTIN/1000
+tgc <- summarySE(stanford_1kip, measurevar="Leptin", groupvars=c("GENDER2","Age"))
+pd <- position_dodge(0.1) # move them .05 to the left and right
+A<- ggplot(tgc, aes(x=Age, y=Leptin, colour=GENDER2)) + 
+  geom_errorbar(aes(ymin=Leptin-ci, ymax=Leptin+ci), colour="black", width=.1, position=pd) +
+  geom_line(position=pd) +
+  geom_point(position=pd, size=3, shape=21, fill="white")
+A<- A + scale_x_discrete(limits=c("<20", "20-29","30-39","40-49","50-59","60-69","70-80",">80"))
+A<-A+ labs(x = 'Age (years)', y = 'Leptin (ng/mL)')+ theme(text=element_text(size=20))
+A<-A +ylim(-2, 6)
+A <- A +theme_minimal()
+A<-A+theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1),text=element_text(family="Helvetica",size=20, color="black"))
+```
+

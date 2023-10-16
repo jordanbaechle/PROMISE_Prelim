@@ -1,0 +1,120 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(compareGroups)
+library(readxl)
+library(dplyr)
+files <- "/opt/home/buckcenter.org/jbaechle/promise_project/files"
+```
+
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+
+Demo <- Demo %>% 
+  mutate(health_status = factor(health_status, 
+                         levels = (c("Healthy",
+                                 "Diab"))),
+         MedsBP = recode(MedsBloodPressure, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         MedsLipidC = recode(MedsLipidsChol, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         MedsGluc = recode(MedsGlucose, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         MedsDM = recode(MedsDiabetes, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         IGT  = recode(IGT, 
+                          "1" = "Yes",
+                          "0" = "No"), 
+         IFG  = recode(IFG, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         TobaccoUse = factor(TobaccoUse, 
+                         levels = (c("Never",
+                                 "Former",
+                                 "Current"))), 
+         AlcoholPerWk = factor(AlcoholPerWk, 
+                         levels = (c("None",
+                                 "<1 drink",
+                                 "1-3 drinks",
+                                 "4-9 drinks",
+                                 "10-14 drinks",
+                                 ">15 drinks"))))
+
+Demo <- Demo %>% 
+  select(-id_patient, -id, -VN, -Dysgly, -DOB, -VisitDate, -MedsBloodPressure, 
+         -MedsLipidsChol, -MedsGlucose, -MedsDiabetes, -DM)
+```
+
+T(dx) - 0
+```{r}
+# Select patient samples 0 years prior to DM diagnosis
+df0 <- Demo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+              "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+              "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+
+Pre0 <- createTable(compareGroups(health_status ~ Sex + Age + BMI + Height + Weight + Waist + Butt +
+                                  TobaccoUse + AlcoholPerWk + MedsBP + MedsLipidC + Systolic + Diastolic +
+                                  Chol + TAG + HDL + LDL + ALT + IGT + IFG + HOMA + HOMA2_S + ISI + ISSI2 + 
+                                  IGIIR + GlucoseAUC + InsulinAUC + Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120, df0, method = 2), show.n=TRUE)
+Pre0
+export2xls(Pre0, file='Pre0_demo_table.xlsx')
+```
+
+T(dx) - 3
+```{r}
+# Select patient samples 3 years prior to DM diagnosis
+df3 <- Demo[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+              "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+              "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+              "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),]
+Pre3 <- createTable(compareGroups(health_status ~ Sex + Age + BMI + Height + Weight + Waist + Butt +
+                                  TobaccoUse + AlcoholPerWk + MedsBP + MedsLipidC + Systolic + Diastolic +
+                                  Chol + TAG + HDL + LDL + ALT + IGT + IFG + HOMA + HOMA2_S + ISI + ISSI2 + 
+                                  IGIIR + GlucoseAUC + InsulinAUC + Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120, df3, method = 2), show.n=TRUE)
+Pre3
+export2xls(Pre3, file='Pre3_demo_table.xlsx')
+```
+
+T(dx) - 6
+```{r}
+# Select patient samples 6 years prior to DM diagnosis
+df6 <- Demo[c("X1152.0.Y6", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+              "X1300.0.Y6", "X2070.0.Y3","X1397.0.Y3", "X2261.0.Y3", 
+              "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+              "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+              "X2321.0.Y3", "X2249.0.Y3"),]
+Pre6 <- createTable(compareGroups(health_status ~ Sex + Age + BMI + Height + Weight + Waist + Butt +
+                                  TobaccoUse + AlcoholPerWk + MedsBP + MedsLipidC + Systolic + Diastolic +
+                                  Chol + TAG + HDL + LDL + ALT + IGT + IFG + HOMA + HOMA2_S + ISI + ISSI2 + 
+                                  IGIIR + GlucoseAUC + InsulinAUC + Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120 , df6, method = 2), show.n=TRUE)
+Pre6
+export2xls(Pre6, file='Pre6_demo_table.xlsx')
+```
+
+T(dx) - 9
+```{r}
+# Select patient samples 9 years prior to DM diagnosis
+df9 <- Demo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+              "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+              "X2321.0.Y0", "X2249.0.Y0"),]
+Pre9 <- createTable(compareGroups(health_status ~ Sex + Age + BMI + Height + Weight + Waist + Butt +
+                                  TobaccoUse + AlcoholPerWk + MedsBP + MedsLipidC + Systolic + Diastolic +
+                                  Chol + TAG + HDL + LDL + ALT + IGT + IFG + HOMA + HOMA2_S + ISI + ISSI2 + 
+                                  IGIIR + GlucoseAUC + InsulinAUC + Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120 , df9, method = 2), show.n=TRUE)
+Pre9
+export2xls(Pre9, file='Pre9_demo_table.xlsx')
+```

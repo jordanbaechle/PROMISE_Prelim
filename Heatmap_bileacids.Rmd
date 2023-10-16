@@ -1,0 +1,280 @@
+
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolon_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+head(df)
+
+pre9_countData <- df |>
+select("metabolite", 
+       "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+       "X2321.0.Y0", "X2249.0.Y0")
+
+metaData9 <- data.frame (
+      id  = 
+      c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+        "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+        "X2321.0.Y0", "X2249.0.Y0"),
+      Site = 
+      c("Convert", "Control","Convert", "Control",
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control"))
+
+df9 <- cbind(as.data.frame(pre9_countData[,1]), sapply(pre9_countData[,-1], as.numeric))
+colnames(df9)[1] <- "metabolite"
+pre9_countData <- as.data.frame(df9)
+pre9_countData   <- pre9_countData  |> na.omit()
+
+countData <- as.data.frame(pre9_countData)
+metaData <- as.data.frame(metaData9)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res9 <- results(dds, contrast=c("Site","Convert", "Control"))
+res9 <- as.data.frame(res9)
+res9 <- res9 %>%
+  add_column(Year = "-9")
+res9$metabolite <- rownames(res9)
+head(res9)
+```
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolon_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+head(df)
+
+pre6_countData <- df |>
+select("metabolite", 
+       "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+       "X1300.0.Y3", "X2070.0.Y3", "X1397.0.Y3", "X2261.0.Y3", 
+       "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+       "X2321.0.Y3", "X2249.0.Y3")
+
+metaData6 <- data.frame(
+        id  = 
+      c("X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+        "X1300.0.Y3", "X2070.0.Y3", "X1397.0.Y3", "X2261.0.Y3", 
+        "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+        "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+        "X2321.0.Y3", "X2249.0.Y3"),
+        Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control"))
+
+df6 <- cbind(as.data.frame(pre6_countData[,1]), sapply(pre6_countData[,-1], as.numeric))
+colnames(df6)[1] <- "metabolite"
+pre6_countData <- as.data.frame(df6)
+pre6_countData   <- pre6_countData  |> na.omit()
+
+countData <- as.data.frame(pre6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res6 <- results(dds, contrast=c("Site","Convert", "Control"))
+res6 <- as.data.frame(res6)
+res6 <- res6 %>%
+  add_column(Year = "-6")
+res6$metabolite <- rownames(res6)
+head(res6)
+```
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolon_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+head(df)
+
+pre3_countData <- df |>
+select("metabolite", 
+       "X1131.0.Y0", "X1129.0.Y0", "X1152.0.Y6", "X2220.0.Y6", 
+       "X1177.0.Y0", "X2186.0.Y0", "X1266.0.Y3", "X2285.0.Y3", 
+       "X1300.0.Y6", "X2070.0.Y6", "X1397.0.Y6", "X2261.0.Y6",
+       "X2042.0.Y3", "X1249.0.Y3", "X2089.0.Y6", "X2280.0.Y6")
+
+metaData3 <- data.frame (
+      id  = 
+      c("X1131.0.Y0", "X1129.0.Y0", "X1152.0.Y6", "X2220.0.Y6", 
+        "X1177.0.Y0", "X2186.0.Y0", "X1266.0.Y3", "X2285.0.Y3", 
+        "X1300.0.Y6", "X2070.0.Y6", "X1397.0.Y6", "X2261.0.Y6",
+        "X2042.0.Y3", "X1249.0.Y3", "X2089.0.Y6", "X2280.0.Y6"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control", 
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control"))
+
+df3 <- cbind(as.data.frame(pre3_countData[,1]), sapply(pre3_countData[,-1], as.numeric))
+colnames(df3)[1] <- "metabolite"
+pre3_countData <- as.data.frame(df3)
+pre3_countData   <- pre3_countData  |> na.omit()
+
+countData <- as.data.frame(pre3_countData)
+metaData <- as.data.frame(metaData3)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res3 <- results(dds, contrast=c("Site","Convert", "Control"))
+res3 <- as.data.frame(res3)
+res3 <- res3 %>%
+  add_column(Year = "-3")
+res3$metabolite <- rownames(res3)
+head(res3)
+```
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolon_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+head(df)
+
+pre0_countData <- df |>
+select("metabolite", 
+      "X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+      "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+      "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6")
+
+metaData0 <- data.frame (
+      id  = 
+      c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+        "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+        "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),
+      Site = 
+      c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control"))
+
+df0 <- cbind(as.data.frame(pre0_countData[,1]), sapply(pre0_countData[,-1], as.numeric))
+colnames(df0)[1] <- "metabolite"
+pre0_countData <- as.data.frame(df0)
+pre0_countData   <- pre0_countData  |> na.omit()
+
+countData <- as.data.frame(pre0_countData)
+metaData <- as.data.frame(metaData0)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res0 <- results(dds, contrast=c("Site","Convert", "Control"))
+res0 <- as.data.frame(res0)
+res0 <- res0 %>%
+  add_column(Year = "0")
+res0$metabolite <- rownames(res0)
+head(res0)
+```
+
+
+```{r}
+df0369_fc_metab = rbind(res9, res6, res3, res0)
+```
+
+```{r}
+df0369_fc_metab_bile_acids <- df0369_fc_metab[c('cholate','chenodeoxycholate'),]
+```
+
+```{r}
+df0369_fc_metab_bile_acids <- df0369_fc_metab %>% filter(row.names(df0369_fc_metab) %in% c('cholate','chenodeoxycholate'))
+```
+
+```{r}
+df0369_fc_metab_bile_acids <- filter(df0369_fc_metab, metabolite %in% c('cholate','chenodeoxycholate', 
+                                                                        
+                                                                        'glycocholate', 'glycochenodeoxycholate', 'glyco-beta-muricholate**', 'glycochenodeoxycholate glucuronide (1)', 
+                                                                        'glycocholate-glucuronide (1)', 'glycochenodeoxycholate 3-sulfate',
+                                                                        
+                                                                        'taurocholate', 'taurochenodeoxycholate',
+                                                                        
+                                                                        'deoxycholate', 'isoursodeoxycholate', 'isoursodeoxycholate sulfate (1)', 'lithocholate', 'ursodeoxycholate',
+                                                                        '7-ketodeoxycholate', 'lithocholate sulfate (1)', 'hyocholate', '7-ketolithocholate',
+                                                                        
+                                                                        'glycodeoxycholate', 'glycolithocholate', 'glycoursodeoxycholate', 'glycodeoxycholate 3-sulfate',
+                                                                        'glycohyocholate', 'glycolithocholate sulfate*',
+                                                                        
+                                                                        'taurocholate', 'taurochenodeoxycholate', 'taurodeoxycholate', 'taurolithocholate',
+                                                                        'tauroursodeoxycholate', 'taurolithocholate 3-sulfate', 'tauro-beta-muricholate'))
+```
+
+glycocholate
+glycochenodeoxycholate
+glyco.beta.muricholate..
+glycochenodeoxycholate.glucuronide..1.
+glycocholate.glucuronide..1.
+glycochenodeoxycholate.3.sulfate
+
+, 
+                                       alpha = c(ifelse(abs(df0369_fc_metab_bile_acids$pvalue ) < 0.05, 1, 0.7)))
+                                       
+```{r}
+
+df0369_fc_metab_bile_acids$metabolite = factor(df0369_fc_metab_bile_acids$metabolite, levels = c('cholate','chenodeoxycholate', 
+                                                                        
+                                                                        'glycocholate', 'glycochenodeoxycholate', 'glyco-beta-muricholate**', 'glycochenodeoxycholate glucuronide (1)', 
+                                                                        'glycocholate-glucuronide (1)', 'glycochenodeoxycholate 3-sulfate',
+                                                                        
+                                                                        'taurocholate', 'taurochenodeoxycholate',
+                                                                        
+                                                                        'deoxycholate', 'isoursodeoxycholate', 'isoursodeoxycholate sulfate (1)', 'lithocholate', 'ursodeoxycholate',
+                                                                        '7-ketodeoxycholate', 'lithocholate sulfate (1)', 'hyocholate', '7-ketolithocholate',
+                                                                        
+                                                                        'glycodeoxycholate', 'glycolithocholate', 'glycoursodeoxycholate', 'glycodeoxycholate 3-sulfate',
+                                                                        'glycohyocholate', 'glycolithocholate sulfate*',
+                                                                        
+                                                                        'taurodeoxycholate', 'taurolithocholate',
+                                                                        'tauroursodeoxycholate', 'taurolithocholate 3-sulfate', 'tauro-beta-muricholate'))
+
+df0369_fc_metab_bile_acids$Year <- as.numeric(df0369_fc_metab_bile_acids$Year)
+
+bile <- ggplot(df0369_fc_metab_bile_acids, aes(Year, metabolite, 
+                                       fill= log2FoldChange)) + 
+  geom_tile(colour = "black", size=1,
+  alpha = c(ifelse(abs(df0369_fc_metab_bile_acids$pvalue ) < 0.05, 1, 0.7))) +
+  theme_minimal() +
+  theme(plot.title = element_text(face="bold"),
+         axis.text.y = element_text(color='black'),
+         axis.text.x = element_text(color='black'),
+         axis.text = element_text(size = 16),
+         legend.title = element_blank())  +  
+         xlab("Year of Study") + ylab(" ") +
+  scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2") +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) + scale_y_discrete(limits=rev)
+
+ggsave("Bile_acid_heatmap_all.png", plot=bile, path=figures, height=9, width=8, units=c("in"), dpi=300)
+```
+
+
+
+
+
+

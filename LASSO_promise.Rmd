@@ -1,0 +1,604 @@
+
+
+```{r}
+library(glmnet)
+library(ggDiagnose)
+library(dplyr)
+set.seed(1994)
+```
+
+```{r}
+# pre-0
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+# countData_metab <- countData_metab[,!startsWith(colnames(countData_metab), "X.")]
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose)
+
+df <- df[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+           "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+           "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+
+health_status <- c("Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control",
+        "Convert", "Control", "Convert", "Control")
+
+for(i in 0:10)
+  {
+pre0_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        nfolds = 11,
+                        alpha = i/10,
+                        type.measure = "class") #can use auc or mse
+ggDiagnose(pre0_lasso, return= TRUE)$ggout
+   }
+
+lamba.1se <- pre0_lasso$lambda.1se
+lambda.min <- pre0_lasso$lambda.min
+
+###
+coefChart<-function(best_model){
+if(length(coef(best_model))==2){
+best_model_coef<-as.data.frame(as.matrix(c(as.data.frame(as.matrix((coef(best_model))))[[1]]$young[,1][-1],as.data.frame(as.matrix((coef(best_model))))[[1]]$old[,1][-1])))
+}else{
+best_model_coef<-as.data.frame(as.matrix(coef(best_model)))
+}
+print(best_model_coef)
+best_model_coef$variable<-gsub("^","\n",rownames(best_model_coef))
+colnames(best_model_coef)<-c("s0","variable")
+best_model_coef<-best_model_coef[!(best_model_coef$s0==0),]
+if(length(coef(best_model))>3){
+best_model_coef<-best_model_coef[-1,]
+}
+print(best_model_coef)
+return(ggplot(data=best_model_coef,aes(x=variable,y=s0))+theme_classic()+theme(axis.text=(element_text( size=10)))+geom_bar(stat="identity")+ylab("Coefficient")+ coord_flip()
+)
+}
+###
+
+pre0_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre0_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+###
+
+pre0_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 0.7,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre0_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+coefChart(pre0_lasso_chart)
+```
+
+
+
+```{r}
+# pre-3 
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+# countData_metab <- countData_metab[,!startsWith(colnames(countData_metab), "X.")]
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose)
+
+df <- df[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),]
+
+health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control")
+
+for(i in 0:10)
+  {
+pre3_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        nfolds = 15,
+                        alpha = i/10,
+                        type.measure = "class") #can use auc or mse
+ggDiagnose(pre3_lasso, return= TRUE)$ggout
+   }
+
+lamba.1se <- pre3_lasso$lambda.1se
+lambda.min <- pre3_lasso$lambda.min
+
+###
+coefChart<-function(best_model){
+if(length(coef(best_model))==2){
+best_model_coef<-as.data.frame(as.matrix(c(as.data.frame(as.matrix((coef(best_model))))[[1]]$young[,1][-1],as.data.frame(as.matrix((coef(best_model))))[[1]]$old[,1][-1])))
+}else{
+best_model_coef<-as.data.frame(as.matrix(coef(best_model)))
+}
+print(best_model_coef)
+best_model_coef$variable<-gsub("^","\n",rownames(best_model_coef))
+colnames(best_model_coef)<-c("s0","variable")
+best_model_coef<-best_model_coef[!(best_model_coef$s0==0),]
+if(length(coef(best_model))>3){
+best_model_coef<-best_model_coef[-1,]
+}
+print(best_model_coef)
+return(ggplot(data=best_model_coef,aes(x=variable,y=s0))+theme_classic()+theme(axis.text=(element_text( size=10)))+geom_bar(stat="identity")+ylab("Coefficient")+ coord_flip()
+)
+}
+###
+
+pre3_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre3_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+###
+
+pre3_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre3_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+
+```
+
+
+```{r}
+# pre-6
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+# countData_metab <- countData_metab[,!startsWith(colnames(countData_metab), "X.")]
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose)
+
+df <- df[c("X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3"),]
+
+health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control",
+        "Convert", "Control")
+
+for(i in 0:10)
+  {
+pre6_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        nfolds = 17,
+                        alpha = i/10,
+                        type.measure = "class") #can use auc or mse
+ggDiagnose(pre6_lasso, return= TRUE)$ggout
+   }
+
+lamba.1se <- pre6_lasso$lambda.1se
+lambda.min <- pre6_lasso$lambda.min
+
+###
+coefChart<-function(best_model){
+if(length(coef(best_model))==2){
+best_model_coef<-as.data.frame(as.matrix(c(as.data.frame(as.matrix((coef(best_model))))[[1]]$young[,1][-1],as.data.frame(as.matrix((coef(best_model))))[[1]]$old[,1][-1])))
+}else{
+best_model_coef<-as.data.frame(as.matrix(coef(best_model)))
+}
+print(best_model_coef)
+best_model_coef$variable<-gsub("^","\n",rownames(best_model_coef))
+colnames(best_model_coef)<-c("s0","variable")
+best_model_coef<-best_model_coef[!(best_model_coef$s0==0),]
+if(length(coef(best_model))>3){
+best_model_coef<-best_model_coef[-1,]
+}
+print(best_model_coef)
+return(ggplot(data=best_model_coef,aes(x=variable,y=s0))+theme_classic()+theme(axis.text=(element_text( size=10)))+geom_bar(stat="identity")+ylab("Coefficient")+ coord_flip()
+)
+}
+###
+
+pre6_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre6_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+###
+
+pre6_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre6_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+coefChart(pre6_lasso_chart)
+```
+
+
+```{r}
+# pre-9
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+# countData_metab <- countData_metab[,!startsWith(colnames(countData_metab), "X.")]
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose)
+
+df <- df[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+
+health_status <- c("Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control")
+
+for(i in 0:10)
+  {
+pre9_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        nfolds = 9,
+                        alpha = i/10,
+                        type.measure = "class") #can use auc or mse
+ggDiagnose(pre9_lasso, return= TRUE)$ggout
+   }
+
+lamba.1se <- pre9_lasso$lambda.1se
+lambda.min <- pre9_lasso$lambda.min
+
+###
+coefChart<-function(best_model){
+if(length(coef(best_model))==2){
+best_model_coef<-as.data.frame(as.matrix(c(as.data.frame(as.matrix((coef(best_model))))[[1]]$young[,1][-1],as.data.frame(as.matrix((coef(best_model))))[[1]]$old[,1][-1])))
+}else{
+best_model_coef<-as.data.frame(as.matrix(coef(best_model)))
+}
+print(best_model_coef)
+best_model_coef$variable<-gsub("^","\n",rownames(best_model_coef))
+colnames(best_model_coef)<-c("s0","variable")
+best_model_coef<-best_model_coef[!(best_model_coef$s0==0),]
+if(length(coef(best_model))>3){
+best_model_coef<-best_model_coef[-1,]
+}
+print(best_model_coef)
+return(ggplot(data=best_model_coef,aes(x=variable,y=s0))+theme_classic()+theme(axis.text=(element_text( size=10)))+geom_bar(stat="identity")+ylab("Coefficient")+ coord_flip()
+)
+}
+###
+
+pre9_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre9_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+###
+
+pre9_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 0.9,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre9_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+coefChart(pre9_lasso_chart)
+```
+
+
+
+```{r}
+# pre- 3-6-9
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+# countData_metab <- countData_metab[,!startsWith(colnames(countData_metab), "X.")]
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose)
+
+df <- df[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6",
+        
+        "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3",
+       
+       "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+
+health_status <- c("Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control",
+        
+        "Convert", "Control", "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control", "Convert", "Control", "Convert", "Control",
+        "Convert", "Control",
+        
+        "Convert", "Control","Convert", "Control","Convert", "Control", 
+        "Convert", "Control", "Convert", "Control")
+
+for(i in 0:10)
+  {
+pre69_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        nfolds = 9,
+                        alpha = i/10,
+                        type.measure = "class") #can use auc or mse
+ggDiagnose(pre69_lasso, return= TRUE)$ggout
+   }
+
+lamba.1se <- pre69_lasso$lambda.1se
+lambda.min <- pre69_lasso$lambda.min
+
+###
+coefChart<-function(best_model){
+if(length(coef(best_model))==2){
+best_model_coef<-as.data.frame(as.matrix(c(as.data.frame(as.matrix((coef(best_model))))[[1]]$young[,1][-1],as.data.frame(as.matrix((coef(best_model))))[[1]]$old[,1][-1])))
+}else{
+best_model_coef<-as.data.frame(as.matrix(coef(best_model)))
+}
+print(best_model_coef)
+best_model_coef$variable<-gsub("^","\n",rownames(best_model_coef))
+colnames(best_model_coef)<-c("s0","variable")
+best_model_coef<-best_model_coef[!(best_model_coef$s0==0),]
+if(length(coef(best_model))>3){
+best_model_coef<-best_model_coef[-1,]
+}
+print(best_model_coef)
+return(ggplot(data=best_model_coef,aes(x=variable,y=s0))+theme_classic()+theme(axis.text=(element_text( size=10)))+geom_bar(stat="identity")+ylab("Coefficient")+ coord_flip()
+)
+}
+###
+
+pre69_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre69_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+###
+
+pre69_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        health_status, 
+                        family = 'binomial', 
+                        alpha = 1,
+                        lambda = lambda.min, # an also use lambda.1se
+                        type.measure = "class"))
+
+confusion.glmnet(pre69_lasso_chart,
+                 as.matrix(df[,-1]), 
+                        health_status)
+
+coefChart(pre69_lasso_chart)
+```
+
+
+```{r}
+# pre- 3-6-9 (LASSO to predict HOMA from proteomics & metabolomics)
+countData_npx <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/promise_npx_X.xlsx")
+countData_npx <- data.frame(countData_npx)
+cols <- sapply(countData_npx, is.numeric)
+# countData_npx[cols] <- 2^(countData_npx[cols])
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- merge(countData_npx, countData_metab, by="id_sample")
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-id_sample)
+df <- df |> select(-glucose, -IGFBP1)
+
+df <- df[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6",
+        
+        "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3",
+       
+       "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+Demo <- Demo |> select(HOMA)
+
+HOMA <- Demo[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+        "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+        "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+        "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6",
+        
+        "X1152.0.Y3", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", "X1300.0.Y3", "X2070.0.Y3",
+       "X1397.0.Y3", "X2261.0.Y3", "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+       "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", "X2321.0.Y3", "X2249.0.Y3",
+       
+       "X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+       "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", "X2321.0.Y0", "X2249.0.Y0"),]
+HOMA[is.na(HOMA)] <- mean(HOMA, na.rm = TRUE)
+
+for(i in 0:10)
+  {
+pre69_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        rescale(HOMA,to=c(0,1)), 
+                        nfolds = 40,
+                        alpha = i/10,
+                        family = 'gaussian',
+                        type.measure = "mse") #can use auc or mse
+
+ggDiagnose(pre69_lasso, return= TRUE)$ggout
+   }
+
+lambda.1se <- pre69_lasso$lambda.1se
+lambda.min <- pre69_lasso$lambda.min
+
+###
+coefChart<-function(best_model){
+if(length(coef(best_model))==2){
+best_model_coef<-as.data.frame(as.matrix(c(as.data.frame(as.matrix((coef(best_model))))[[1]]$young[,1][-1],as.data.frame(as.matrix((coef(best_model))))[[1]]$old[,1][-1])))
+}else{
+best_model_coef<-as.data.frame(as.matrix(coef(best_model)))
+}
+print(best_model_coef)
+best_model_coef$variable<-gsub("^","\n",rownames(best_model_coef))
+colnames(best_model_coef)<-c("s0","variable")
+best_model_coef<-best_model_coef[!(best_model_coef$s0==0),]
+if(length(coef(best_model))>3){
+best_model_coef<-best_model_coef[-1,]
+}
+print(best_model_coef)
+#best_model_coef$variable <- gsub(".", "-", best_model_coef$variable)
+return(ggplot
+       (data=best_model_coef,aes(x=reorder(variable, s0), y=s0, label=round(s0, digits = 3))) +
+         theme_minimal()+
+         theme(axis.text=(element_text( size=10))) +
+         geom_bar(aes(fill = s0), color='black', stat="identity") +
+         geom_text(size = 2, nudge_y = ifelse(best_model_coef$s0 > 0, 1.5, -1.5)) +
+         ylab("Coefficient")+ coord_flip() +
+          scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2")
+)
+}
+
+pre69_lasso_chart <- (glmnet(as.matrix(df[,-1]), 
+                        HOMA, 
+                        family = 'gaussian', 
+                        alpha = 1,
+                        lambda = lambda.1se, # an also use lambda.1se
+                        type.measure = "mse"))
+
+signature<-as.data.frame(as.matrix(best_model_coef))
+signature$variable<- rownames(best_model_coef)
+#signature <- subset(signature, s1 < 0 & s1 > 0)
+#signature<- signature[!(signature$s1==0),]
+write_csv(signature, file = "/bigrock/FurmanLab/DataRepository/promise/proteomics/HOMA_signature.csv")
+
+coefChart(pre69_lasso_chart)
+```

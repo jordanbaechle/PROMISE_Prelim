@@ -1,0 +1,109 @@
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+countData  <- countData %>% distinct(metabolite, .keep_all = TRUE)
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+
+### comparison 1
+prepostOGTT_pre6 <- df |>
+select("metabolite", 
+       "X2249.0.Y3","X2249.120.Y3", "X2321.0.Y3", "X2321.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", "X2127.0.Y3", "X2127.120.Y3",
+       "X2089.0.Y3", "X2089.120.Y3", "X2099.0.Y3", "X2099.120.Y3",
+       "X2261.0.Y3", "X2261.120.Y3", "X1397.0.Y3", "X1397.120.Y3",
+       "X2070.0.Y3", "X2070.120.Y3", "X1300.0.Y3", "X1300.120.Y3",
+       "X2220.0.Y3", "X2220.120.Y3", "X1152.0.Y3", "X1152.120.Y3")
+
+convert_6 <- prepostOGTT_pre6 |>
+select("metabolite", 
+       "X2321.0.Y3", "X2321.120.Y3",
+       "X2127.0.Y3", "X2127.120.Y3",
+       "X2099.0.Y3", "X2099.120.Y3",
+       "X1397.0.Y3", "X1397.120.Y3",
+       "X1300.0.Y3", "X1300.120.Y3",
+       "X1152.0.Y3", "X1152.120.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X2321.0.Y3", "X2321.120.Y3",
+        "X2127.0.Y3", "X2127.120.Y3",
+        "X2099.0.Y3", "X2099.120.Y3",
+        "X1397.0.Y3", "X1397.120.Y3",
+        "X1300.0.Y3", "X1300.120.Y3",
+        "X1152.0.Y3", "X1152.120.Y3"),
+      
+      Site = 
+      c("Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post",
+        "Pre", "Post"))
+
+df <- cbind(as.data.frame(convert_6[,1]), 
+            sapply(convert_6[,-1], as.numeric))
+colnames(df)[1] <- "metabolite"
+convert_6_countData <- as.data.frame(df)
+convert_6_countData  <- convert_6_countData  |> na.omit()
+
+# Differential metabolites
+countData <- as.data.frame(convert_6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+convert_DEGs <- results(dds, contrast=c("Site","Post", "Pre"))
+
+
+### comparison 2
+control_6 <- prepostOGTT_pre6 |>
+select("metabolite", 
+       "X2249.0.Y3","X2249.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", 
+       "X2089.0.Y3", "X2089.120.Y3", 
+       "X2261.0.Y3", "X2261.120.Y3", 
+       "X2070.0.Y3", "X2070.120.Y3", 
+       "X2220.0.Y3", "X2220.120.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X2249.0.Y3","X2249.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", 
+       "X2089.0.Y3", "X2089.120.Y3", 
+       "X2261.0.Y3", "X2261.120.Y3", 
+       "X2070.0.Y3", "X2070.120.Y3", 
+       "X2220.0.Y3", "X2220.120.Y3"),
+      
+      Site = 
+      c("Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post",
+        "Pre", "Post"))
+
+df <- cbind(as.data.frame(control_6[,1]), 
+            sapply(control_6[,-1], as.numeric))
+colnames(df)[1] <- "metabolite"
+control_6_countData <- as.data.frame(df)
+control_6_countData  <- control_6_countData  |> na.omit()
+
+# Differential metabolites
+countData <- as.data.frame(control_6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+control_DEGs <- results(dds, contrast=c("Site","Post", "Pre"))
+
+
+```
+

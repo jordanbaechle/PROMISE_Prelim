@@ -1,0 +1,140 @@
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+arivale_demo <- read_csv("/bigrock/FurmanLab/DataRepository/promise/Arivale/arrivale_demographics.csv")
+arivale_demo <- data.frame(arivale_demo)
+arivale_demo$public_client_id <- as.numeric(arivale_demo$public_client_id)
+head(arivale_demo)
+arivale_metab <- read_csv("/bigrock/FurmanLab/DataRepository/promise/Arivale/arrivale_metabolomics_data.csv")
+arivale_metab <- data.frame(arivale_metab)
+arivale_metab$public_client_id <- as.numeric(arivale_metab$public_client_id)
+head(arivale_metab)
+arivale_demo_metab <- merge(arivale_demo, arivale_metab, by="public_client_id")
+head(arivale_demo_metab)
+
+# Inclusion Criteria
+# arivale_demo_metab <- subset(arivale_demo_metab, Diarrhea2 >= 3)
+# arivale_demo_metab <- subset(arivale_demo_metab, Prescription == 1)
+# arivale_demo_metab <- subset(arivale_demo_metab, Antibiotics > 0)
+# arivale_demo_metab <- subset(arivale_demo_metab, age >= 40)
+
+```
+
+```{r}
+
+my.formula <- y ~ x
+p <- ggplot(data = arivale_demo_metab, aes(x = HOMA, y = cholate)) +
+  geom_smooth(method = "gam", se=TRUE, formula = my.formula) +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+               parse = TRUE) +         
+  geom_point(aes(x = HOMA, y = valine),
+                   size=2.5, shape=21, stroke=1, alpha=0.80) +
+  labs(x = 'HOMA', y = 'Valine')+ theme(text=element_text(size=20)) +
+  #scale_x_continuous(limits=c(0,100), breaks=seq(0,100, by = 25)) +
+  #scale_y_continuous(limits=c(0,3), breaks=seq(0,3, by = 1)) +
+  theme_pubr() +  scale_fill_manual(values=c("#00A087FF", "#E64B35FF"))
+p
+```
+
+
+```{r}
+countData_metab <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metab_X.xlsx")
+countData_metab <- data.frame(countData_metab)
+cols <- sapply(countData_metab, is.numeric)
+# countData_metab[cols] <- log(countData_metab[cols])
+df <- countData_metab
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+df %>% mutate(across(where(is.numeric), some_fxn))
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+promise_metab <- df
+promise_metab$id <- promise_metab$id_sample
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+promise_demo <- as.data.frame(Demo)
+promise_demo_metab <- merge(promise_demo, promise_metab, by="id")
+```
+
+
+```{r}
+promise_demo_metab$HOMA <- as.numeric(promise_demo_metab$HOMA)
+my.formula <- y ~ x
+p <- ggplot(data = promise_demo_metab, aes(x = ISI, y = valine, alpha=0.95)) +
+  geom_smooth(method = "gam", se=TRUE, formula = my.formula) +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+               parse = TRUE) +         
+  geom_point()
+p
+```
+
+
+
+
+```{r}
+library(glmnet)
+library(ggDiagnose)
+library(dplyr)
+library(readxl)
+library(scales)
+library(ggplot2)
+set.seed(1994)
+```
+
+
+
+```{r}
+arivale_metab <- read_csv("/bigrock/FurmanLab/DataRepository/promise/Arivale/arrivale_metabolomics_data.csv")
+countData_metab<- data.frame(arivale_metab)
+cols <- sapply(countData_metab, is.numeric)
+countData_metab[cols] <- log(countData_metab[cols])
+df <- countData_metab
+df <- df[,!startsWith(colnames(df), "X.")]
+some_fxn <- function(x) {ifelse(x<0,0,x)}
+
+#scale_0_to_1 <- function(x) {(x - min(x)) / (max(x) - min(x))}
+df %>% mutate(across(where(is.numeric), some_fxn))
+#df <- as.data.frame(sapply(df[,-1], some_fxn))
+# df <- cbind(id_sample = df[,1], df)
+df <- df %>% select_if(~!any(is.na(.)))
+rownames(df) <- df[,1]
+df <- df |> select(-public_client_id)
+
+
+arivale_demo <- read_csv("/bigrock/FurmanLab/DataRepository/promise/Arivale/arrivale_demographics.csv")
+arivale_demo$public_client_id <- as.numeric(arivale_demo$public_client_id)
+arivale_demo <- data.frame(arivale_demo)
+# rownames(arivale_demo) <- arivale_demo[,1]
+arivale_demo <- arivale_demo |> select(HOMA)
+HOMA <- arivale_demo
+HOMA[is.na(HOMA)] <- mean(HOMA, na.rm = TRUE)
+```
+
+
+
+```{r}
+
+for(i in 0:10)
+  {
+pre69_lasso <- cv.glmnet(as.matrix(df[,-1]), 
+                        rescale(HOMA,to=c(0,1)), 
+                        nfolds = 40,
+                        alpha = i/10,
+                        family = 'gaussian',
+                        type.measure = "mse") #can use auc or mse
+
+ggDiagnose(pre69_lasso, return= TRUE)$ggout
+   }
+
+lambda.1se <- pre69_lasso$lambda.1se
+lambda.min <- pre69_lasso$lambda.min
+
+```
+
+
+
+

@@ -1,0 +1,181 @@
+```{r}
+library(compareGroups)
+library(readxl)
+library(dplyr)
+library(fmsb)
+library(ggradar)
+library(scales)
+library(tidyverse)
+files <- "/opt/home/buckcenter.org/jbaechle/promise_project/files"
+```
+
+```{r}
+# T(dx) - 0
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, Height, Weight,	Waist,	Butt,	BMI)
+Demo <- Demo %>% mutate(across(c(Height, Weight,	Waist,	Butt,	BMI), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+Demo$Height <- rescale(Demo$Height, to=c(0,1))
+Demo$Weight <- rescale(Demo$Weight, to=c(0,1))
+Demo$Waist <- rescale(Demo$Waist, to=c(0,1))
+Demo$Butt <- rescale(Demo$Butt, to=c(0,1))
+Demo$BMI <- rescale(Demo$BMI, to=c(0,1))
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+              "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+              "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+# rownames(Demo) <- Demo[,1]
+Demo <- Demo %>% 
+  group_by(health_status) %>% 
+  summarize(Height = mean(Height, na.rm = TRUE), 
+            Weight = mean(Weight, na.rm = TRUE),   
+            Waist = mean(Waist, na.rm = TRUE),
+            Butt = mean(Butt, na.rm = TRUE), 
+            BMI = mean(BMI, na.rm = TRUE))
+lcols <- c("#E64B35FF", "#00A087FF")
+Pre0_radar <- ggradar(Demo,
+        background.circle.colour = "white",
+        axis.line.colour = "gray90",
+        gridline.min.colour = "gray90",
+        gridline.mid.colour = "gray90",
+        gridline.max.colour = "gray90",
+        group.colours = lcols,
+        group.point.size = 1,
+        group.line.width = 1,
+        fill = TRUE,
+        fill.alpha = 0.1,
+        legend.position = "none")
+Pre0_radar
+ggsave("Pre0_radar.png", plot=Pre0_radar, path = figures,height=4, width=6, units=c("in"), dpi=300)
+```
+
+
+
+
+```{r}
+# T(dx) - 3
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, Height, Weight,	Waist,	Butt,	BMI)
+Demo <- Demo %>% mutate(across(c(Height, Weight,	Waist,	Butt,	BMI), ~replace_na(., median(., na.rm=TRUE))))
+Demo <- as.data.frame(Demo)
+Demo$Height <- rescale(Demo$Height)
+Demo$Weight <- rescale(Demo$Weight)
+Demo$Waist <- rescale(Demo$Waist)
+Demo$Butt <- rescale(Demo$Butt)
+Demo$BMI <- rescale(Demo$BMI)
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+              "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+              "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+              "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),]
+Demo <- Demo %>% 
+  group_by(health_status) %>% 
+  summarize(Height = mean(Height, na.rm = TRUE), 
+            Weight = mean(Weight, na.rm = TRUE),   
+            Waist = mean(Waist, na.rm = TRUE),
+            Butt = mean(Butt, na.rm = TRUE), 
+            BMI = mean(BMI, na.rm = TRUE))
+lcols <- c("#E64B35FF", "#00A087FF")
+Pre3_radar <- ggradar(Demo,
+        background.circle.colour = "white",
+        axis.line.colour = "gray90",
+        gridline.min.colour = "gray90",
+        gridline.mid.colour = "gray90",
+        gridline.max.colour = "gray90",
+        group.colours = lcols,
+        group.point.size = 1,
+        group.line.width = 1,
+        fill = TRUE,
+        fill.alpha = 0.1,
+        legend.position = "none")
+Pre3_radar
+ggsave("Pre3_radar.png", plot=Pre3_radar, path = figures,height=4, width=6, units=c("in"), dpi=300)
+```
+
+```{r}
+# T(dx) - 6
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, Height, Weight,	Waist,	Butt,	BMI)
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% mutate(across(c(Height, Weight,	Waist,	Butt,	BMI), ~replace_na(., median(., na.rm=TRUE))))
+Demo$Height <- rescale(Demo$Height)
+Demo$Weight <- rescale(Demo$Weight)
+Demo$Waist <- rescale(Demo$Waist)
+Demo$Butt <- rescale(Demo$Butt)
+Demo$BMI <- rescale(Demo$BMI)
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1152.0.Y6", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+              "X1300.0.Y6", "X2070.0.Y3","X1397.0.Y3", "X2261.0.Y3", 
+              "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+              "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+              "X2321.0.Y3", "X2249.0.Y3"),]
+Demo <- Demo %>% 
+  group_by(health_status) %>% 
+  summarize(Height = mean(Height, na.rm = TRUE), 
+            Weight = mean(Weight, na.rm = TRUE),   
+            Waist = mean(Waist, na.rm = TRUE),
+            Butt = mean(Butt, na.rm = TRUE), 
+            BMI = mean(BMI, na.rm = TRUE))
+lcols <- c("#E64B35FF", "#00A087FF")
+Pre6_radar <- ggradar(Demo,
+        background.circle.colour = "white",
+        axis.line.colour = "gray90",
+        gridline.min.colour = "gray90",
+        gridline.mid.colour = "gray90",
+        gridline.max.colour = "gray90",
+        group.colours = lcols,
+        group.point.size = 1,
+        group.line.width = 1,
+        fill = TRUE,
+        fill.alpha = 0.1,
+        legend.position = "none")
+Pre6_radar
+ggsave("Pre6_radar.png", plot=Pre6_radar, path = figures,height=4, width=6, units=c("in"), dpi=300)
+
+```
+```{r}
+# T(dx) - 9
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/promise_demographics.xlsx")
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% 
+  select(id, health_status, Height, Weight,	Waist,	Butt,	BMI)
+Demo <- as.data.frame(Demo)
+Demo <- Demo %>% mutate(across(c(Height, Weight,	Waist,	Butt,	BMI), ~replace_na(., median(., na.rm=TRUE))))
+Demo$Height <- rescale(Demo$Height, to=c(0,1))
+Demo$Weight <- rescale(Demo$Weight, to=c(0,1))
+Demo$Waist <- rescale(Demo$Waist, to=c(0,1))
+Demo$Butt <- rescale(Demo$Butt, to=c(0,1))
+Demo$BMI <- rescale(Demo$BMI, to=c(0,1))
+rownames(Demo) <- Demo[,1]
+Demo <- Demo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+              "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+              "X2321.0.Y0", "X2249.0.Y0"),]
+Demo <- Demo %>% 
+  group_by(health_status) %>% 
+  summarize(Height = mean(Height, na.rm = TRUE), 
+            Weight = mean(Weight, na.rm = TRUE),   
+            Waist = mean(Waist, na.rm = TRUE),
+            Butt = mean(Butt, na.rm = TRUE), 
+            BMI = mean(BMI, na.rm = TRUE))
+lcols <- c("#E64B35FF", "#00A087FF")
+Pre9_radar <- ggradar(Demo,
+        background.circle.colour = "white",
+        axis.line.colour = "gray90",
+        gridline.min.colour = "gray90",
+        gridline.mid.colour = "gray90",
+        gridline.max.colour = "gray90",
+        group.colours = lcols,
+        group.point.size = 1,
+        group.line.width = 1,
+        fill = TRUE,
+        fill.alpha = 0.1,
+        legend.position = "none")
+Pre9_radar
+ggsave("Pre9_radar.png", plot=Pre9_radar, path = figures,height=4, width=6, units=c("in"), dpi=300)
+```

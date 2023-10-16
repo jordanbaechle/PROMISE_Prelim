@@ -1,0 +1,76 @@
+
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+countData  <- countData %>% distinct(metabolite, .keep_all = TRUE)
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+
+prepostOGTT_pre6 <- df |>
+select("metabolite", 
+       "X2249.0.Y3","X2249.120.Y3", "X2321.0.Y3", "X2321.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", "X2127.0.Y3", "X2127.120.Y3",
+       "X2089.0.Y3", "X2089.120.Y3", "X2099.0.Y3", "X2099.120.Y3",
+       "X2261.0.Y3", "X2261.120.Y3", "X1397.0.Y3", "X1397.120.Y3",
+       "X2070.0.Y3", "X2070.120.Y3", "X1300.0.Y3", "X1300.120.Y3",
+       "X2220.0.Y3", "X2220.120.Y3", "X1152.0.Y3", "X1152.120.Y3")
+write.csv(prepostOGTT_pre6, "prepostOGTT_pre6.csv")
+write_csv(prepostOGTT_pre6, file = "/bigrock/FurmanLab/DataRepository/promise/metabolomics/prepostOGTT_pre6.csv")
+```
+
+
+
+```{r}
+res <- read.csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/prepostOGTT_pre6_fc.csv")
+rownames(res) <- res[,1]
+res$log2FoldChange <- res$Delta_FC
+res <- res |> select(log2FoldChange, pvalue)
+head(res)
+
+
+ keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+
+
+PrePost6_OGTT <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(Delta ~Log[2]~ 'fold change'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      labSize = 3,
+                      pointSize = c(ifelse(abs(res$pvalue) < 0.05, 2, 1.5)),
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = TRUE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      caption = NULL,
+                       max.overlaps = 10,
+                      maxoverlapsConnectors = 10,
+                      widthConnectors = 0.3, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+PrePost6_OGTT <- PrePost6_OGTT + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05)
+PrePost6_OGTT
+ggsave("Pre6_OGTT_Volcano_DEM.png", plot=PrePost6_OGTT, path=figures, height=7, width=6, units=c("in"), dpi=300)
+```
+

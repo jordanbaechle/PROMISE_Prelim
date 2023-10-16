@@ -1,0 +1,301 @@
+
+
+
+```{r}
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metadata.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+dfB_demo<- Demo[c('X1792_054_B', 'X1792_1018_B', 'X1792_1022_B', 'X1792_983_B', 
+                  'X1792_1008_B', 'X1792_1009_B', 'X1792_1027_B', 'X1792_1030_B',
+                  'X1792_336_B', 'X1792_1010_B', 'X1792_1019_B', 'X1792_1023_B', 
+                  'X1792_1026_B'),]
+dfB_demo$id <- rownames(dfB_demo) 
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metabolites_trans.xlsx")
+dfB_metabo <- data.frame(countData)
+rownames(dfB_metabo) <- dfB_metabo$SAMPLE_ID
+dfB_metabo <- dfB_metabo[c('X1792_054_B', 'X1792_1018_B', 'X1792_1022_B', 'X1792_983_B', 
+                          'X1792_1008_B', 'X1792_1009_B', 'X1792_1027_B', 'X1792_1030_B',
+                          'X1792_336_B', 'X1792_1010_B', 'X1792_1019_B', 'X1792_1023_B', 
+                          'X1792_1026_B'),]
+dfB_metabo$id <- rownames(dfB_metabo) 
+
+# combine
+dfB_demo_metabo <- merge(dfB_demo, dfB_metabo, by="id")
+
+dfB_demo_metabo <- dfB_demo_metabo %>%
+  add_column(Time = "0")
+dfB_demo_metabo
+
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metadata.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df2_demo<- Demo[c('X1792_054_2', 'X1792_1018_2', 'X1792_1022_2', 'X1792_983_2', 
+                  'X1792_1008_2', 'X1792_1009_2', 'X1792_1027_2', 'X1792_1030_2',
+                  'X1792_336_2', 'X1792_1010_2', 'X1792_1019_2', 'X1792_1023_2', 
+                  'X1792_1026_2'),]
+df2_demo$id <- rownames(df2_demo) 
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metabolites_trans.xlsx")
+df2_metabo <- data.frame(countData)
+rownames(df2_metabo) <- df2_metabo$SAMPLE_ID
+df2_metabo <- df2_metabo[c('X1792_054_2', 'X1792_1018_2', 'X1792_1022_2', 'X1792_983_2', 
+                          'X1792_1008_2', 'X1792_1009_2', 'X1792_1027_2', 'X1792_1030_2',
+                          'X1792_336_2', 'X1792_1010_2', 'X1792_1019_2', 'X1792_1023_2', 
+                          'X1792_1026_2'),]
+df2_metabo$id <- rownames(df2_metabo) 
+
+# combine
+df2_demo_metabo <- merge(df2_demo, df2_metabo, by="id")
+
+df2_demo_metabo <- df2_demo_metabo %>%
+  add_column(Time = "2")
+df2_demo_metabo
+
+
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metadata.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df4_demo<- Demo[c('X1792_054_4', 'X1792_1018_4', 'X1792_1022_4', 'X1792_983_4', 
+                  'X1792_1008_4', 'X1792_1009_4', 'X1792_1027_4', 'X1792_1030_4',
+                  'X1792_336_4', 'X1792_1010_4', 'X1792_1019_4', 'X1792_1023_4', 
+                  'X1792_1026_4'),]
+df4_demo$id <- rownames(df4_demo) 
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metabolites_trans.xlsx")
+df4_metabo <- data.frame(countData)
+rownames(df4_metabo) <- df4_metabo$SAMPLE_ID
+df4_metabo <- df4_metabo[c('X1792_054_4', 'X1792_1018_4', 'X1792_1022_4', 'X1792_983_4', 
+                          'X1792_1008_4', 'X1792_1009_4', 'X1792_1027_4', 'X1792_1030_4',
+                          'X1792_336_4', 'X1792_1010_4', 'X1792_1019_4', 'X1792_1023_4', 
+                          'X1792_1026_4'),]
+df4_metabo$id <- rownames(df4_metabo) 
+
+# combine
+df4_demo_metabo <- merge(df4_demo, df4_metabo, by="id")
+
+df4_demo_metabo <- df4_demo_metabo %>%
+  add_column(Time = "4")
+df4_demo_metabo
+
+# Demographics
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metadata.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+df8_demo<- Demo[c('X1792_054_8', 'X1792_1018_8', 'X1792_1022_8', 'X1792_983_8', 
+                  'X1792_1008_8', 'X1792_1009_8', 'X1792_1027_8', 'X1792_1030_8',
+                  'X1792_336_8', 'X1792_1010_8', 'X1792_1019_8', 'X1792_1023_8', 
+                  'X1792_1026_8'),]
+df8_demo$id <- rownames(df8_demo) 
+
+# Metabolites
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metabolites_trans.xlsx")
+df8_metabo <- data.frame(countData)
+rownames(df8_metabo) <- df8_metabo$SAMPLE_ID
+df8_metabo <- df8_metabo[c('X1792_054_8', 'X1792_1018_8', 'X1792_1022_8', 'X1792_983_8', 
+                          'X1792_1008_8', 'X1792_1009_8', 'X1792_1027_8', 'X1792_1030_8',
+                          'X1792_336_8', 'X1792_1010_8', 'X1792_1019_8', 'X1792_1023_8', 
+                          'X1792_1026_8'),]
+df8_metabo$id <- rownames(df8_metabo) 
+
+# combine
+df8_demo_metabo <- merge(df8_demo, df8_metabo, by="id")
+
+df8_demo_metabo <- df8_demo_metabo %>%
+  add_column(Time = "8")
+df8_demo_metabo
+
+dfB248_demo_metabo = rbind(dfB_demo_metabo, df2_demo_metabo, df4_demo_metabo, df8_demo_metabo)
+dfB248_demo_metabo$Time <- as.numeric(dfB248_demo_metabo$Time)
+```
+
+
+
+```{r}
+dfB248_demo_metabo$Time<- as.numeric(dfB248_demo_metabo$Time)
+data_sum <- summarySE(dfB248_demo_metabo, measurevar="ursodeoxycholate", groupvars=c("GROUP","Time"))
+pd <- position_dodge(0.00) 
+UDCA <- ggplot(data_sum, 
+           aes(x = Time, y = ursodeoxycholate, 
+               colour = GROUP)) + 
+  geom_errorbar(aes(ymin = ursodeoxycholate-se, ymax = ursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.15, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = GROUP),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = GROUP),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+ scale_x_continuous(limits=c(0,8), breaks=seq(0,8, by = 2)) + 
+  labs(x = 'Time', 
+       y = 'Ursodeoxycholate\n(UDCA)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(breaks=seq(0,4, by = 1),
+                    labels = scales::number_format(accuracy = 0.1)) + 
+  scale_fill_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) +
+  scale_color_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) 
+UDCA
+```
+
+```{r}
+dfB248_demo_metabo$Time<- as.numeric(dfB248_demo_metabo$Time)
+data_sum <- summarySE(dfB248_demo_metabo, measurevar="isoursodeoxycholate", groupvars=c("GROUP","Time"))
+pd <- position_dodge() 
+IUDCA <- ggplot(data_sum, 
+           aes(x = Time, y = isoursodeoxycholate, 
+               colour = GROUP)) + 
+  geom_errorbar(aes(ymin = isoursodeoxycholate-se, ymax = isoursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.15, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = GROUP),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = GROUP),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+ scale_x_continuous(limits=c(0,8), breaks=seq(0,8, by = 2)) + 
+  labs(x = 'Time', 
+       y = 'Isoursodeoxycholate\n(IUDCA)') + 
+  theme(text = element_text(size=18)) +
+ scale_y_continuous(limits=c(0,8), breaks=seq(0,8, by = 2),
+                    labels = scales::number_format(accuracy = 0.1)) + 
+  scale_fill_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) +
+  scale_color_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) 
+IUDCA
+```                
+                         
+```{r}
+dfB248_demo_metabo$Time<- as.numeric(dfB248_demo_metabo$Time)
+data_sum <- summarySE(dfB248_demo_metabo, measurevar="glycoursodeoxycholate", groupvars=c("GROUP","Time"))
+pd <- position_dodge(0.00) 
+GUDCA <- ggplot(data_sum, 
+           aes(x = Time, y = glycoursodeoxycholate, 
+               colour = GROUP)) + 
+  geom_errorbar(aes(ymin = glycoursodeoxycholate-se, ymax = glycoursodeoxycholate+se), 
+                colour = "black", 
+                width = 0.15, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = GROUP),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = GROUP),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+ scale_x_continuous(limits=c(0,8), breaks=seq(0,8, by = 2)) + 
+  labs(x = 'Time', 
+       y = 'Glycoursodeoxycholate\n(GUDCA)') +
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,8), breaks=seq(0,8, by = 2),
+                    labels = scales::number_format(accuracy = 0.1)) + 
+  scale_fill_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) +
+  scale_color_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) 
+GUDCA
+```
+
+
+
+```{r}
+UDCAss <- ggarrange(
+        UDCA,
+        IUDCA, 
+        GUDCA,
+        ncol = 2, nrow = 2, common.legend = TRUE, align = "hv", legend = "right") 
+UDCAss 
+
+ggsave("UDCAs_overfeeding.png", plot=UDCAss, path=figures, height=9, width=13.5, units=c("in"), dpi=300)
+```
+
+
+
+```{r}
+dfB248_demo_metabo$Time<- as.numeric(dfB248_demo_metabo$Time)
+data_sum <- summarySE(dfB248_demo_metabo, measurevar="X2.hydroxyhippurate..salicylurate.", groupvars=c("GROUP","Time"))
+pd <- position_dodge() 
+salicylurate <- ggplot(data_sum, 
+           aes(x = Time, y = X2.hydroxyhippurate..salicylurate., 
+               colour = GROUP)) + 
+  geom_errorbar(aes(ymin = X2.hydroxyhippurate..salicylurate.-se, ymax = X2.hydroxyhippurate..salicylurate.+se), 
+                colour = "black", 
+                width = 0.15, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = GROUP),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = GROUP),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+ scale_x_continuous(limits=c(0,8), breaks=seq(0,8, by = 2)) + 
+  labs(x = 'Time', 
+       y = 'Salicylurate\n(2-hydroxyhippurate)') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,12), breaks=seq(0,12, by = 3),
+                    labels = scales::number_format(accuracy = 0.1)) + 
+  scale_fill_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) +
+  scale_color_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) 
+salicylurate
+``` 
+
+
+
+```{r}
+dfB248_demo_metabo$Time<- as.numeric(dfB248_demo_metabo$Time)
+data_sum <- summarySE(dfB248_demo_metabo, measurevar="salicylate", groupvars=c("GROUP","Time"))
+pd <- position_dodge() 
+salicylate <- ggplot(data_sum, 
+           aes(x = Time, y = salicylate, 
+               colour = GROUP)) + 
+  geom_errorbar(aes(ymin = salicylate-se, ymax = salicylate+se), 
+                colour = "black", 
+                width = 0.15, 
+                position = pd,
+                size = 1) +
+  geom_line(aes(fill = GROUP),
+            position = pd,
+            size = 1.3) +
+  geom_point(aes(fill = GROUP),
+             color = "black",
+             position = pd, 
+             size = 4, 
+             shape = 21,
+             stroke = 1.3) +
+  theme_pubr() +
+ scale_x_continuous(limits=c(0,8), breaks=seq(0,8, by = 2)) + 
+  labs(x = 'Time', 
+       y = 'Salicylate\n ') + 
+  theme(text = element_text(size=18)) +
+  scale_y_continuous(limits=c(0,8), breaks=seq(0,8, by = 2),
+                    labels = scales::number_format(accuracy = 0.1)) + 
+  scale_fill_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) +
+  scale_color_manual(values=c("#E64B35FF","#00A087FF","#F39B7FFF")) 
+salicylate
+``` 
+

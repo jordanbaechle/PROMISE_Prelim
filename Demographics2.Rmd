@@ -1,0 +1,325 @@
+```{r}
+library(compareGroups)
+library(readxl)
+library(dplyr)
+files <- "/opt/home/buckcenter.org/jbaechle/promise_project/files"
+```
+
+```{r}
+Demo <- read_excel("/bigrock/FurmanLab/DataRepository/promise/demographics/case_match_list_FINAL.xlsx")
+Demo <- as.data.frame(Demo)
+rownames(Demo) <- Demo[,1]
+
+Demo <- Demo %>% 
+  mutate(health_status = factor(health_status, 
+                         levels = (c("Healthy",
+                                 "Diab"))),
+         MedsBP = recode(MedsBloodPressure, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         MedsLipidC = recode(MedsLipidsChol, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         MedsGluc = recode(MedsGlucose, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         MedsDM = recode(MedsDiabetes, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         IGT  = recode(IGT, 
+                          "1" = "Yes",
+                          "0" = "No"), 
+         IFG  = recode(IFG, 
+                          "1" = "Yes",
+                          "0" = "No"),
+         TobaccoUse = factor(TobaccoUse, 
+                         levels = (c("Never",
+                                 "Former",
+                                 "Current"))), 
+         AlcoholPerWk = factor(AlcoholPerWk, 
+                         levels = (c("None",
+                                 "<1 drink",
+                                 "1-3 drinks",
+                                 "4-9 drinks",
+                                 "10-14 drinks",
+                                 ">15 drinks"))),
+        SelfEdu = factor(SelfEdu, 
+                         levels = (c("1-8yrs",
+                                 "9-12yrs",
+                                 "Trade school",
+                                 "College/University",
+                                 "NA"))),
+        Occupation = factor(Occupation, 
+                         levels = (c("NA",
+                                 "Semi-skilled manual",
+                                 "Skilled non-manual",
+                                 "Skilled manual",
+                                 "Intermediate",
+                                 "Professional"))), 
+        Income = factor(Income, 
+                         levels = (c("0-29999",
+                                 "30-39999",
+                                 "40-49999",
+                                 "50-59999",
+                                 ">60000",
+                                 "Declined",
+                                 "NA"))),
+       Birthweight = factor(Birthweight, 
+                         levels = (c("<5.5lb",
+                                 "5.5-10lb",
+                                 ">10lb",
+                                 "Unknown",
+                                 "NA"))))
+
+```
+
+T(dx) - 0
+```{r}
+# Select patient samples 0 years prior to DM diagnosis
+df0 <- Demo[c("X1006.0.Y3", "X1075.0.Y3", "X1131.0.Y3", "X1129.0.Y3",
+              "X1177.0.Y3", "X2186.0.Y3", "X1266.0.Y6", "X2285.0.Y6", 
+              "X2042.0.Y6", "X1249.0.Y6", "X2265.0.Y6", "X1150.0.Y6"),]
+
+df0 <- df0 %>% mutate_at(c('Age', 'BMI', 'Height', 'Weight', 'Waist', 'Butt', 'Iliac', 'MET', 'Systolic', 
+                           'Diastolic', 'MeanArtPressure', 'Heart', 
+                            'Creatinine', 'UDBP', 'Chol', 'TAG',
+                            'HDL', 'LDL', 'ALT','HbA1c', 'Creatinine', 'VitaminD',
+                            'UDBP', 'PTH', 'CRP', 'UrineMicroalbumin',
+                           'UrineCreatinine', 'HOMA', 'HOMA2_S', 'HOMA2_B', 'HOMA2IR', 'ISI', 'ISSI2', 
+                           'IGIIR', 'InsulinClearance', 'GlucoseAUC', 'InsulinAUC', 'CPeptideAUC', 
+                           'Glucose0', 'Glucose30', 'Glucose120', 
+                           'Insulin0', 'Insulin30', 'Insulin120', 
+                           'CPeptide0', 'CPeptide30', 'CPeptide120'), as.numeric)
+
+Pre0 <- createTable(compareGroups(health_status ~ Sex + Age + Ethnicity +
+                                  BMI + Height + Weight + Waist + Butt + Iliac +
+                                    
+                                  SelfEdu + Occupation + Income + Birthweight + 
+                                  MET + TobaccoUse + AlcoholPerWk + 
+                                  MedsBP + MedsLipidC + 
+                                  Systolic + Diastolic + MeanArtPressure + Heart +
+                                  Chol + TAG + HDL + LDL + ALT + HbA1c + 
+                                  Creatinine + VitaminD + UDBP + PTH + CRP +
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  IGT + IFG + HOMA + HOMA2_S + HOMA2_B + HOMA2IR +
+                                  ISI + ISSI2 + IGIIR + InsulinClearance + 
+                                  GlucoseAUC + InsulinAUC + CPeptideAUC +
+                                  Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120 + 
+                                  CPeptide0 + CPeptide30 + CPeptide120
+                                  
+                                  , df0, method = 2), show.n=TRUE)
+Pre0
+export2xls(Pre0, file='Pre0_demo_table2.xlsx')
+
+Pre0_OR <- createTable(compareGroups(health_status ~ 
+                                  BMI + Weight + Waist +
+
+                                  MET + 
+                                    
+                                  Systolic + Diastolic + 
+                                  
+                                  Chol + TAG + HDL + LDL + ALT +
+                                  Creatinine + VitaminD + PTH + CRP +
+                                    
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  HOMA + 
+                                  
+                                  ISI + IGIIR + ISSI2
+                                  
+                                  , df0, method = 2), show.n=TRUE, show.ratio=TRUE)
+Pre0_OR
+export2xls(Pre0_OR, file='Pre0_OR_demo_table2.xlsx')
+
+```
+
+T(dx) - 3
+```{r}
+# Select patient samples 3 years prior to DM diagnosis
+df3 <- Demo[c("X1131.0.Y0", "X1129.0.Y0", "X1177.0.Y0", "X2186.0.Y0",
+              "X1266.0.Y3", "X2285.0.Y3", "X1300.0.Y6", "X2070.0.Y6", 
+              "X1397.0.Y6", "X2261.0.Y6", "X2042.0.Y3", "X1249.0.Y3", 
+              "X2099.0.Y6", "X2089.0.Y6", "X2127.0.Y6", "X2280.0.Y6"),]
+
+df3 <- df3 %>% mutate_at(c('Age', 'BMI', 'Height', 'Weight', 'Waist', 'Butt', 'Iliac', 'MET', 'Systolic', 
+                           'Diastolic', 'MeanArtPressure', 'Heart', 
+                            'Creatinine', 'UDBP', 'Chol', 'TAG',
+                            'HDL', 'LDL', 'ALT','HbA1c', 'Creatinine', 'VitaminD',
+                            'UDBP', 'PTH', 'CRP', 'UrineMicroalbumin',
+                           'UrineCreatinine', 'HOMA', 'HOMA2_S', 'HOMA2_B', 'HOMA2IR', 'ISI', 'ISSI2', 
+                           'IGIIR', 'InsulinClearance', 'GlucoseAUC', 'InsulinAUC', 'CPeptideAUC', 
+                           'Glucose0', 'Glucose30', 'Glucose120', 
+                           'Insulin0', 'Insulin30', 'Insulin120', 
+                           'CPeptide0', 'CPeptide30', 'CPeptide120'), as.numeric)
+
+Pre3 <- createTable(compareGroups(health_status ~ Sex + Age + Ethnicity +
+                                  BMI + Height + Weight + Waist + Butt + Iliac +
+                                    
+                                  SelfEdu + Occupation + Income + Birthweight + 
+                                  MET + TobaccoUse + AlcoholPerWk + 
+                                  MedsBP + MedsLipidC + 
+                                  Systolic + Diastolic + MeanArtPressure + Heart +
+                                  Chol + TAG + HDL + LDL + ALT + HbA1c + 
+                                  Creatinine + VitaminD + UDBP + PTH + CRP +
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  IGT + IFG + HOMA + HOMA2_S + HOMA2_B + HOMA2IR +
+                                  ISI + ISSI2 + IGIIR + InsulinClearance + 
+                                  GlucoseAUC + InsulinAUC + CPeptideAUC +
+                                  Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120 + 
+                                  CPeptide0 + CPeptide30 + CPeptide120
+                                  
+                                  , df3, method = 2), show.n=TRUE)
+Pre3
+export2xls(Pre3, file='Pre3_demo_table2.xlsx')
+
+Pre3_OR <- createTable(compareGroups(health_status ~ 
+                                  BMI + Weight + Waist +
+
+                                  MET + 
+                                    
+                                  Systolic + Diastolic + 
+                                  
+                                  Chol + TAG + HDL + LDL + ALT +
+                                  Creatinine + VitaminD + PTH + CRP +
+                                    
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  HOMA + 
+                                  
+                                  ISI + IGIIR + ISSI2
+                                  
+                                  , df3, method = 2), show.n=TRUE, show.ratio=TRUE)
+Pre3_OR
+export2xls(Pre3_OR, file='Pre3_OR_demo_table2.xlsx')
+```
+
+T(dx) - 6
+```{r}
+# Select patient samples 6 years prior to DM diagnosis
+df6 <- Demo[c("X1152.0.Y6", "X2220.0.Y3", "X1266.0.Y0", "X2285.0.Y0", 
+              "X1300.0.Y6", "X2070.0.Y3","X1397.0.Y3", "X2261.0.Y3", 
+              "X2042.0.Y0", "X1249.0.Y0", "X2099.0.Y3", "X2089.0.Y3",
+              "X2127.0.Y3", "X2280.0.Y3", "X2265.0.Y0", "X1150.0.Y0", 
+              "X2321.0.Y3", "X2249.0.Y3"),]
+
+df6 <- df6 %>% mutate_at(c('Age', 'BMI', 'Height', 'Weight', 'Waist', 'Butt', 'Iliac', 'MET', 'Systolic', 
+                           'Diastolic', 'MeanArtPressure', 'Heart', 
+                            'Creatinine', 'UDBP', 'Chol', 'TAG',
+                            'HDL', 'LDL', 'ALT','HbA1c', 'Creatinine', 'VitaminD',
+                            'UDBP', 'PTH', 'CRP', 'UrineMicroalbumin',
+                           'UrineCreatinine', 'HOMA', 'HOMA2_S', 'HOMA2_B', 'HOMA2IR', 'ISI', 'ISSI2', 
+                           'IGIIR', 'InsulinClearance', 'GlucoseAUC', 'InsulinAUC', 'CPeptideAUC', 
+                           'Glucose0', 'Glucose30', 'Glucose120', 
+                           'Insulin0', 'Insulin30', 'Insulin120', 
+                           'CPeptide0', 'CPeptide30', 'CPeptide120'), as.numeric)
+
+Pre6 <- createTable(compareGroups(health_status ~ Sex + Age + Ethnicity +
+                                  BMI + Height + Weight + Waist + Butt + Iliac +
+                                    
+                                  SelfEdu + Occupation + Income + Birthweight + 
+                                  MET + TobaccoUse + AlcoholPerWk + 
+                                  MedsBP + MedsLipidC + 
+                                  Systolic + Diastolic + MeanArtPressure + Heart +
+                                  Chol + TAG + HDL + LDL + ALT + HbA1c + 
+                                  Creatinine + VitaminD + UDBP + PTH + CRP +
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  IGT + IFG + HOMA + HOMA2_S + HOMA2_B + HOMA2IR +
+                                  ISI + ISSI2 + IGIIR + InsulinClearance + 
+                                  GlucoseAUC + InsulinAUC + CPeptideAUC +
+                                  Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120 + 
+                                  CPeptide0 + CPeptide30 + CPeptide120
+                                  
+                                  , df6, method = 2), show.n=TRUE)
+Pre6
+export2xls(Pre6, file='Pre6_demo_table2.xlsx')
+
+Pre6_OR <- createTable(compareGroups(health_status ~ 
+                                  BMI + Weight + Waist +
+
+                                  MET + 
+                                    
+                                  Systolic + Diastolic + 
+                                  
+                                  Chol + TAG + HDL + LDL + ALT +
+                                  Creatinine + VitaminD + PTH + CRP +
+                                    
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  HOMA + 
+                                  
+                                  ISI + IGIIR + ISSI2
+                                  
+                                  , df6, method = 2), show.n=TRUE, show.ratio=TRUE)
+Pre6_OR
+export2xls(Pre6_OR, file='Pre6_OR_demo_table2.xlsx')
+```
+
+T(dx) - 9
+```{r}
+# Select patient samples 9 years prior to DM diagnosis
+df9 <- Demo[c("X1300.0.Y0", "X2070.0.Y0", "X1397.0.Y0", "X2261.0.Y0",
+              "X2099.0.Y0", "X2089.0.Y0", "X2127.0.Y0", "X2280.0.Y0", 
+              "X2321.0.Y0", "X2249.0.Y0", "X2220.0.Y0", "X1152.0.Y0"),]
+
+df9 <- df9 %>% mutate_at(c('Age', 'BMI', 'Height', 'Weight', 'Waist', 'Butt', 'Iliac', 'MET', 'Systolic', 
+                           'Diastolic', 'MeanArtPressure', 'Heart', 
+                            'Creatinine', 'UDBP', 'Chol', 'TAG',
+                            'HDL', 'LDL', 'ALT','HbA1c', 'Creatinine', 'VitaminD',
+                            'UDBP', 'PTH', 'CRP', 'UrineMicroalbumin',
+                           'UrineCreatinine', 'HOMA', 'HOMA2_S', 'HOMA2_B', 'HOMA2IR', 'ISI', 'ISSI2', 
+                           'IGIIR', 'InsulinClearance', 'GlucoseAUC', 'InsulinAUC', 'CPeptideAUC', 
+                           'Glucose0', 'Glucose30', 'Glucose120', 
+                           'Insulin0', 'Insulin30', 'Insulin120', 
+                           'CPeptide0', 'CPeptide30', 'CPeptide120'), as.numeric)
+
+Pre9 <- createTable(compareGroups(health_status ~ Sex + Age + Ethnicity +
+                                  BMI + Height + Weight + Waist + Butt + Iliac +
+                                    
+                                  SelfEdu + Occupation + Income + Birthweight + 
+                                  MET + TobaccoUse + AlcoholPerWk + 
+                                  MedsBP + MedsLipidC + 
+                                  Systolic + Diastolic + MeanArtPressure + Heart +
+                                  Chol + TAG + HDL + LDL + ALT + HbA1c + 
+                                  Creatinine + VitaminD + UDBP + PTH + CRP +
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  IGT + IFG + HOMA + HOMA2_S + HOMA2_B + HOMA2IR +
+                                  ISI + ISSI2 + IGIIR + InsulinClearance + 
+                                  GlucoseAUC + InsulinAUC + CPeptideAUC +
+                                  Glucose0 + Glucose30 + Glucose120 + 
+                                  Insulin0 + Insulin30 + Insulin120 + 
+                                  CPeptide0 + CPeptide30 + CPeptide120
+                                  
+                                  , df9, method = 2), show.n=TRUE)
+Pre9
+export2xls(Pre9, file='Pre9_demo_table2.xlsx')
+
+
+Pre9_OR <- createTable(compareGroups(health_status ~ 
+                                  BMI + Weight + Waist +
+
+                                  MET + 
+                                    
+                                  Systolic + Diastolic + 
+                                  
+                                  Chol + TAG + HDL + LDL + ALT +
+                                  Creatinine + VitaminD + PTH + CRP +
+                                    
+                                  UrineMicroalbumin + UrineCreatinine +
+                                    
+                                  HOMA + 
+                                  
+                                  ISI + IGIIR + ISSI2
+                                  
+                                  , df9, method = 2), show.n=TRUE, show.ratio=TRUE)
+Pre9_OR
+export2xls(Pre9_OR, file='Pre9_OR_demo_table2.xlsx')
+
+
+```

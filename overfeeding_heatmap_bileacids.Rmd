@@ -1,0 +1,176 @@
+
+```{r}
+countData <- read.csv("/bigrock/FurmanLab/DataRepository/promise/overfeeding/overfeeding_metabolomicsALL4.csv")
+countData <- data.frame(countData)
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+head(df)
+
+##
+  
+preB_countData <- df |>
+select("metabolite", 
+       'X1792_054_B', 'X1792_1018_B', 'X1792_1022_B', 
+       'X1792_983_B', 'X1792_1008_B', 'X1792_1009_B', 'X1792_1027_B', 'X1792_1030_B')
+
+metaDataB <- data.frame (
+      id  = 
+      c('X1792_054_B', 'X1792_1018_B', 'X1792_1022_B', 
+        'X1792_983_B', 'X1792_1008_B', 'X1792_1009_B', 'X1792_1027_B', 'X1792_1030_B'),
+      Site = 
+      c("Sensitive", "Sensitive","Sensitive", 
+        "Resistant","Resistant","Resistant","Resistant","Resistant"))
+
+dfB <- cbind(as.data.frame(preB_countData[,1]), sapply(preB_countData[,-1], as.numeric))
+colnames(dfB)[1] <- "metabolite"
+preB_countData <- as.data.frame(dfB)
+preB_countData   <- preB_countData  |> na.omit()
+
+countData <- as.data.frame(preB_countData)
+metaData <- as.data.frame(metaDataB)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+resB <- results(dds, contrast=c("Site","Resistant", "Sensitive"))
+resB <- as.data.frame(resB)
+resB <- resB %>%
+  add_column(Year = "0")
+resB$metabolite <- rownames(resB)
+head(resB)
+
+##
+
+pre2_countData <- df |>
+select("metabolite", 
+       'X1792_054_2', 'X1792_1018_2', 'X1792_1022_2', 
+       'X1792_983_2', 'X1792_1008_2', 'X1792_1009_2', 'X1792_1027_2', 'X1792_1030_2')
+
+metaData2 <- data.frame (
+      id  = 
+      c('X1792_054_2', 'X1792_1018_2', 'X1792_1022_2', 
+        'X1792_983_2', 'X1792_1008_2', 'X1792_1009_2', 'X1792_1027_2', 'X1792_1030_2'),
+      Site = 
+      c("Sensitive", "Sensitive","Sensitive", 
+        "Resistant","Resistant","Resistant","Resistant","Resistant"))
+
+df2 <- cbind(as.data.frame(pre2_countData[,1]), sapply(pre2_countData[,-1], as.numeric))
+colnames(df2)[1] <- "metabolite"
+pre2_countData <- as.data.frame(df2)
+pre2_countData   <- pre2_countData  |> na.omit()
+
+countData <- as.data.frame(pre2_countData)
+metaData <- as.data.frame(metaData2)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res2 <- results(dds, contrast=c("Site","Resistant", "Sensitive"))
+res2 <- as.data.frame(res2)
+res2 <- res2 %>%
+  add_column(Year = "2")
+res2$metabolite <- rownames(res2)
+head(res2)
+
+##
+
+pre4_countData <- df |>
+select("metabolite", 
+       'X1792_054_4', 'X1792_1018_4', 'X1792_1022_4', 
+       'X1792_983_4', 'X1792_1008_4', 'X1792_1009_4', 'X1792_1027_4', 'X1792_1030_4')
+
+metaData4 <- data.frame (
+      id  = 
+      c('X1792_054_4', 'X1792_1018_4', 'X1792_1022_4', 
+        'X1792_983_4', 'X1792_1008_4', 'X1792_1009_4', 'X1792_1027_4', 'X1792_1030_4'),
+      Site = 
+      c("Sensitive", "Sensitive","Sensitive", 
+        "Resistant","Resistant","Resistant","Resistant","Resistant"))
+
+df4 <- cbind(as.data.frame(pre4_countData[,1]), sapply(pre4_countData[,-1], as.numeric))
+colnames(df4)[1] <- "metabolite"
+pre4_countData <- as.data.frame(df4)
+pre4_countData   <- pre4_countData  |> na.omit()
+
+countData <- as.data.frame(pre4_countData)
+metaData <- as.data.frame(metaData4)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res4 <- results(dds, contrast=c("Site","Resistant", "Sensitive"))
+res4 <- as.data.frame(res4)
+res4 <- res4 %>%
+  add_column(Year = "4")
+res4$metabolite <- rownames(res4)
+head(res4)
+
+##
+
+pre8_countData <- df |>
+select("metabolite", 
+       'X1792_054_8', 'X1792_1018_8', 'X1792_1022_8', 
+       'X1792_983_8', 'X1792_1008_8', 'X1792_1009_8', 'X1792_1027_8', 'X1792_1030_8')
+
+metaData8 <- data.frame (
+      id  = 
+      c('X1792_054_8', 'X1792_1018_8', 'X1792_1022_8', 
+        'X1792_983_8', 'X1792_1008_8', 'X1792_1009_8', 'X1792_1027_8', 'X1792_1030_8'),
+      Site = 
+      c("Sensitive", "Sensitive","Sensitive", 
+        "Resistant","Resistant","Resistant","Resistant","Resistant"))
+
+df8 <- cbind(as.data.frame(pre8_countData[,1]), sapply(pre8_countData[,-1], as.numeric))
+colnames(df8)[1] <- "metabolite"
+pre8_countData <- as.data.frame(df8)
+pre8_countData   <- pre8_countData  |> na.omit()
+
+countData <- as.data.frame(pre8_countData)
+metaData <- as.data.frame(metaData8)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res8 <- results(dds, contrast=c("Site","Resistant", "Sensitive"))
+res8 <- as.data.frame(res8)
+res8 <- res8 %>%
+  add_column(Year = "8")
+res8$metabolite <- rownames(res8)
+head(res8)
+
+
+dfB0248_fc_metab = rbind(resB, res2, res4, res8)
+
+```
+
+
+```{r}
+dfB248_fc_metab_bile_acids <- filter(dfB0248_fc_metab, metabolite %in% c(
+                    'cholate','chenodeoxycholate', 'glycocholate', 'glycochenodeoxycholate', 'glyco-beta-muricholate**', 
+                    'glycochenodeoxycholate glucuronide (1)', 'glycocholate-glucuronide (1)', 'glycochenodeoxycholate 3-sulfate',
+                    'taurocholate', 'taurochenodeoxycholate', 'deoxycholate', 'isoursodeoxycholate', 'isoursodeoxycholate sulfate (1)', 
+                    'lithocholate', 'ursodeoxycholate', '7-ketodeoxycholate', 'lithocholate sulfate (1)', 'hyocholate', '7-ketolithocholate',
+                    'glycodeoxycholate', 'glycolithocholate', 'glycoursodeoxycholate', 'glycodeoxycholate 3-sulfate', 'glycohyocholate', 
+                    'glycolithocholate sulfate*', 'taurochenodeoxycholate', 'taurodeoxycholate', 'taurolithocholate',
+                     'tauroursodeoxycholate', 'taurolithocholate 3-sulfate', 'tauro-beta-muricholate'))
+```
+
+```{r}
+dfB248_fc_metab_bile_acids$Time <- as.numeric(dfB248_fc_metab_bile_acids$Year)
+
+bile <- ggplot(dfB248_fc_metab_bile_acids, aes(Time, metabolite, 
+                                       fill= log2FoldChange)) + 
+  geom_tile(colour = "black", size=1,
+            alpha = c(ifelse(abs(dfB248_fc_metab_bile_acids$pvalue ) < 0.05, 1, 0.0))) +
+  theme_minimal() +
+  theme(plot.title = element_text(face="bold"),
+         axis.text.y = element_text(color='black'),
+         axis.text.x = element_text(color='black'),
+         axis.text = element_text(size = 16),
+         legend.title = element_blank())  +  
+         xlab("Time") + ylab(" ") +
+  scale_fill_gradient2(low = "#3C5488B2" ,  mid = "#ffffff", high = "#DC0000B2") +
+  scale_x_continuous(breaks=seq(0, 8, 2)) + scale_y_discrete(limits=rev)
+
+ggsave("Overfeding_Bile_acid_heatmap_sig.png", plot=bile, path=figures, height=9, width=8, units=c("in"), dpi=300)
+```
+
+
+

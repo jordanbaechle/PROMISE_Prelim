@@ -1,0 +1,41 @@
+---
+title: "palette"
+subtitle: " "
+author:
+- name: "Baechle"
+  url: https://github.com/
+  affiliation: Buck Institute for Research on Aging
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_notebook: default
+  pdf_document: default
+  theme: spacelab
+---
+
+### Packages
+```{r}
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(reshape2)
+library(ggrepel)
+library(readxl)
+library(ggsci)
+library(ggthemes)
+library(ggpubr)
+figures <- "/opt/home/buckcenter.org/jbaechle/promise_project/figures"
+```
+
+### Generate Palette
+```{r}
+mypal <- pal_npg("nrc", alpha = 1)(9)
+mypal
+show_col(mypal)
+# scale_color_npg() 
+# scale_fill_npg()
+```
+
+
+
+
+

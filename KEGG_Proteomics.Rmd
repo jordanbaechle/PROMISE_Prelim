@@ -1,0 +1,144 @@
+---
+title: "Proteomics Pathway Analysis"
+subtitle: " "
+author:
+- name: "Baechle"
+  url: https://github.com/
+  affiliation: Buck Institute for Research on Aging
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_notebook: default
+  pdf_document: default
+  theme: spacelab
+---
+
+### Packages
+```{r}
+library(gage)
+library(DESeq2)
+library(scales)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(janitor)
+library(clusterProfiler)
+library(DOSE)
+library(dplyr)
+library(gapminder)
+library(tidyverse)
+library(ggsci)
+library(ggthemes)
+figures <- "/opt/home/buckcenter.org/jbaechle/promise_project/figures"
+
+# set up KEGG database
+kg.hsa <- kegg.gsets(species="hsa")
+kegg.sigmet.gs <- kg.hsa$kg.sets[kg.hsa$sigmet.idx]
+kegg.dise.gs <- kg.hsa$kg.sets[kg.hsa$dise.idx]
+
+
+### set up GO database
+go.hs <- go.gsets(species="human")
+go.bp.gs <- go.hs$go.sets[go.hs$go.subs$BP]
+go.mf.gs <- go.hs$go.sets[go.hs$go.subs$MF]
+go.cc.gs <- go.hs$go.sets[go.hs$go.subs$CC]
+```
+
+## Load data
+### TDx - 3
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre3_NPX_integer_fm.xlsx")
+metaData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre3_NPX_dm.xlsx")
+```
+
+### TDx - 6
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre6_NPX_integer_fm.xlsx")
+metaData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre6_NPX_dm.xlsx")
+```
+
+### TDx - 9
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre9_NPX_integer_fm.xlsx")
+metaData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/proteomics/pre9_NPX_dm.xlsx")
+```
+
+### Differential Expression
+```{r}
+countData <- as.data.frame(countData)
+metaData <- as.data.frame(metaData)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+DEGs <- results(dds, contrast=c("Site","Convert", "Control"))
+DEGs <- subset(DEGs, pvalue <= 0.2)
+DEGs$symbol <- mapIds(org.Hs.eg.db, keys=row.names(DEGs), column="SYMBOL", keytype="SYMBOL", multiVals="first")
+DEGs$entrez <- mapIds(org.Hs.eg.db, keys=row.names(DEGs), column="ENTREZID", keytype="SYMBOL", multiVals="first")
+DEGs$name <- mapIds(org.Hs.eg.db, keys=row.names(DEGs), column="GENENAME", keytype="SYMBOL", multiVals="first")
+DEGs.fc <- DEGs$log2FoldChange
+names(DEGs.fc) <- DEGs$entrez
+
+### Enrichment analysis on all (+/-) log fc
+fc.kegg.sigmet.p <- gage(DEGs.fc, gsets = kegg.sigmet.gs)
+fc.kegg.dise.p <- gage(DEGs.fc, gsets = kegg.dise.gs)
+fc.go.bp.p <- gage(DEGs.fc, gsets = go.bp.gs)
+fc.go.mf.p <- gage(DEGs.fc, gsets = go.mf.gs)
+fc.go.cc.p <- gage(DEGs.fc, gsets = go.cc.gs)
+
+### covert the KEGG results to data frames
+fc.kegg.sigmet.p.up <- as.data.frame(fc.kegg.sigmet.p$greater)
+fc.kegg.dise.p.up <- as.data.frame(fc.kegg.dise.p$greater)
+fc.kegg.sigmet.p.down <- as.data.frame(fc.kegg.sigmet.p$less)
+fc.kegg.dise.p.down <- as.data.frame(fc.kegg.dise.p$less)
+
+df2_up <-top_n(fc.kegg.sigmet.p.up, 3, stat.mean)
+df2_down <-top_n(fc.kegg.sigmet.p.down, -3, stat.mean)
+pathway <- rbind(df2_up, df2_down)
+head(pathway)
+pathway$kegg<- row.names(pathway)     
+# pathway$kegg <- gsub("Hsa*"," ", pathway$kegg)
+# pathway <- setNames(pathway, c("hsa","kegg_pathway","p.geomean", "stat.mean", "p.val", "q.val", "set.size", "exp1"))
+color <- ifelse(pathway$stat.mean >= 0, "Up-regulated", "Down-regulated")
+pathway$color <- ifelse(pathway$stat.mean >= 0, "Up-regulated", "Down-regulated")
+```
+
+```{r}
+pathway$color <- ifelse(pathway$stat.mean >= 0, "Up-regulated", "Down-regulated")
+
+pre3_kegg_barplot <- ggplot(data = pathway,
+           aes(x = reorder(kegg, stat.mean), y = stat.mean)) +
+  geom_bar(stat = "identity",
+           show.legend = TRUE,
+           aes(fill = color, alpha=p.val), # Background color
+           color = "black") + # Border color
+  coord_flip() +
+  labs(y = "Enrichment Score", x = " ",
+       title = " ",
+       subtitles = " ")+
+  geom_hline(yintercept = 0, color = 1, lwd = 1) +
+  theme_classic() +
+  scale_y_continuous(limits=c(-3,3), breaks=seq(-3,3,1)) +
+  theme(text=element_text(size=18), legend.position="bottom")  + 
+ # geom_text(aes(x=kegg, y=0, label=kegg), hjust=pathway$just) +
+  scale_alpha_continuous(trans = reverse_trans()) +
+  scale_fill_manual(values=c("#3C5488B2", "#DC0000B2")) 
+  # guides(y = "none") +
+  # scale_x_discrete("", labels=NULL) +
+  # scale_colour_gradient2(low = "#DC0000B2",  mid = "#ffffff", high = "#3C5488B2")
+pre3_kegg_barplot
+# ggsave("pre3_kegg_proteomics_barplot.png", plot=pre3_kegg_barplot, path = figures, height=6, width=9, units=c("in"), dpi=300)
+```
+
+
+
+
+```{r}
+library(ggcharts)
+
+pre3_kegg_barplot <- 
+  diverging_bar_chart(pathway, 
+                      kegg, 
+                      stat.mean, 
+                      bar_color = c("#DC0000B2", "#3C5488B2"))
+pre3_kegg_barplot
+
+```
+

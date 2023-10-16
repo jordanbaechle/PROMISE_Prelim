@@ -1,0 +1,684 @@
+
+
+
+```{r}
+Pre9_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9_pvalue_metaboanalyst.xlsx")
+Pre6_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre6_pvalue_metaboanalyst.xlsx")
+Pre3_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre3_pvalue_metaboanalyst.xlsx")
+Pre0_pvalue <- read_excel("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre0_pvalue_metaboanalyst.xlsx")
+
+Pre9630_pvalue <- Pre9_pvalue %>%
+              left_join(Pre6_pvalue, by='path') %>%
+              left_join(Pre3_pvalue, by='path') %>%
+              left_join(Pre0_pvalue, by='path')
+
+#Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+write_csv(Pre9630_pvalue, 
+          file = "/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue_all.csv")
+
+
+```
+
+
+```{r}
+library(tidyverse)
+library(ggbeeswarm)
+library(packcircles)
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+```
+
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_9 <- -log10(Pre9630_pvalue$RawP_9)
+
+Pre9_bubble <- ggplot(Pre9630_pvalue, aes(Pre9, RawP_9, fill = RawP_9)) +
+ geom_quasirandom(aes(size = Impact_9), shape = 21, 
+                  alpha = c(ifelse(abs(Pre9630_pvalue$RawP_9) > 1.3, 0.9, 0.25)), 
+                  groupOnX = FALSE, priority = "random", width =0.15) +
+ geom_text_repel(data=subset(Pre9630_pvalue, path == c('Bile secretion' , 'Phe metabolism', 'Cys/Met metabolism',
+                                                       'Retrograde EC signaling', 'Choline metabolism')),
+    aes(x = Pre9, y = RawP_9,label=path,point.size = Impact_9),
+    size = 5, # font size in the text labels
+    point.padding = 0, # additional padding around each point
+    min.segment.length = 0, # draw all line segments
+    max.time = 1, max.iter = 1e5, # stop after 1 second, or after 100,000 iterations
+    box.padding = 0.3 # additional padding around each text label
+  ) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "#4DBBD5B2") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "top", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre9_bubble
+```
+
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_9 <- -log10(Pre9630_pvalue$RawP_9)
+
+Pre9_bubble <- ggplot(Pre9630_pvalue, aes(Pre9, RawP_9, fill = RawP_9)) +
+ geom_quasirandom(aes(size = Impact_9), shape = 21, 
+                  alpha = c(ifelse(abs(Pre9630_pvalue$RawP_9) > 1.3, 0.9, 0.25)), 
+                  groupOnX = FALSE, priority = "random", width =0.15) +
+ geom_text_repel(data=subset(Pre9630_pvalue, path == c('Bile secretion' , 'Phe metabolism', 'Cys/Met metabolism',
+                                                       'Retrograde EC signaling', 'Choline metabolism')),
+           aes(x = Pre9, y = RawP_9,label=path), 
+           min.segment.length =5, 
+           max.time = 1, max.iter = 1e5, 
+           box.padding = 0.3,
+           max.overlaps = Inf) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "#4DBBD5B2") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "top", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre9_bubble
+```
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_6 <- -log10(Pre9630_pvalue$RawP_6)
+
+Pre6_bubble <- ggplot(Pre9630_pvalue, aes(Pre6, RawP_6, fill = RawP_6)) +
+ # geom_beeswarm(aes(size = Impact_9), shape = 21, alpha = .8, groupOnX = FALSE, priority = "random") +
+   geom_quasirandom(aes(size = Impact_6), shape = 21, 
+                    alpha = c(ifelse(abs(Pre9630_pvalue$RawP_6) > 1.3, 0.9, 0.25)), 
+                    groupOnX = FALSE, priority = "random", width =0.15) +
+  geom_text_repel(data=subset(Pre9630_pvalue, RawP_6 > 1.3),
+           aes(x = Pre6, y = RawP_6,label=path), 
+           min.segment.length = 0, 
+           max.time = 1, max.iter = 1e5, 
+           box.padding = 0.3,
+           max.overlaps = Inf) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "#4DBBD5B2") +
+  coord_cartesian(clip = "off")  +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre6_bubble
+```
+
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_3 <- -log10(Pre9630_pvalue$RawP_3)
+
+Pre3_bubble <- ggplot(Pre9630_pvalue, aes(Pre3, RawP_3, fill = RawP_3)) +
+ # geom_beeswarm(aes(size = Impact_9), shape = 21, alpha = .8, groupOnX = FALSE, priority = "random") +
+  geom_quasirandom(aes(size = Impact_3), shape = 21, 
+                    alpha = c(ifelse(abs(Pre9630_pvalue$RawP_3) > 1.3, 0.9, 0.25)), 
+                    groupOnX = FALSE, priority = "random", width =0.15) +
+  geom_text_repel(data=subset(Pre9630_pvalue, RawP_3 > 1.3),
+           aes(x = Pre3, y = RawP_3,label=path), 
+           min.segment.length = 0, 
+           max.time = 1, max.iter = 1e5, 
+           box.padding = 0.3,
+           max.overlaps = Inf) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "#4DBBD5B2") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+Pre3_bubble
+```
+
+
+```{r}
+Pre9630_pvalue<- read_csv("/bigrock/FurmanLab/DataRepository/promise/Misc/Pre9630_pvalue2.csv")
+Pre9630_pvalue   <- Pre9630_pvalue |> na.omit()
+Pre9630_pvalue$RawP_0 <- -log10(Pre9630_pvalue$RawP_0)
+
+Pre0_bubble <- ggplot(Pre9630_pvalue, aes(Pre0, RawP_0, fill = RawP_0)) +
+ # geom_beeswarm(aes(size = Impact_9), shape = 21, alpha = .8, groupOnX = FALSE, priority = "random") +
+  geom_quasirandom(aes(size = Impact_0), shape = 21, 
+                   alpha = c(ifelse(abs(Pre9630_pvalue$RawP_0) > 1.3, 0.9, 0.25)), 
+                   groupOnX = FALSE, priority = "random", width =0.15) +
+  geom_text_repel(data=subset(Pre9630_pvalue, RawP_0 > 1.3),
+           aes(x = Pre0, y = RawP_0,label=path),
+           min.segment.length = 0, 
+           max.time = 1, max.iter = 1e5, 
+           box.padding = 0.3,
+           max.overlaps = Inf) +
+  scale_size(range = c(2,10)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme_pubr() +
+  scale_fill_gradient2(low = "#ffffff", high = "#4DBBD5B2") +
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  theme(legend.position = "right", 
+        axis.line=element_line(size=0.75),
+        axis.ticks=element_line(size=0.75)) +
+  scale_y_continuous(limits=c(0, 5), breaks=seq(0,5,1))
+
+Pre0_bubble
+```
+
+
+```{r}
+bubble <- ggarrange(Pre9_bubble + rremove("xlab"), 
+                Pre6_bubble + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                Pre3_bubble + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"),
+                Pre0_bubble + rremove("ylab") + rremove("xlab") + rremove("y.axis") + rremove("y.ticks") + rremove("y.text"), 
+                ncol = 4, nrow = 1, legend = "none", align = "hv")
+bubble
+#ggsave("PM_volcano.png", plot=PM_volcano, path=figures, height=5, width=14, units=c("in"), dpi=300)
+```
+
+
+
+
+
+rownames(Pre9630_pvalue) <- Pre9630_pvalue$path
+df <- Pre9630_pvalue[c('Bile secretion','Phe metabolism', 'Cys/Met metabolism', 'Retrograde EC signaling', 'Choline metabolism', 'Val/Leu/Ile biosynthesis'),]
+
+```{r}
+Pre9630_pvalue <- as.data.frame(Pre9630_pvalue)
+rownames(Pre9630_pvalue) <- Pre9630_pvalue$path
+
+df <- Pre9630_pvalue[c('Bile secretion','Phe metabolism', 'Cys/Met metabolism', 'Retrograde EC signaling', 'Choline metabolism', 'Val/Leu/Ile biosynthesis'),]
+
+df <- df %>% 
+  mutate(Pre9 = recode(Pre9, 
+                          "Pre9" = "9"),
+         Pre6 = recode(Pre6, 
+                          "Pre6" = "6"),
+         Pre3 = recode(Pre3, 
+                          "Pre3" = "3"),
+         Pre0 = recode(Pre0, 
+                          "Pre0" = "0"))
+head(df)
+
+df <- df[,c('path', 'RawP_9','RawP_6', 'RawP_3', 'RawP_0')]
+       
+melt_df <- melt(df, na.rm = FALSE, id = c("path"))
+
+melt_df <- melt_df %>% 
+  mutate(variable = recode(variable, 
+                          "RawP_9" = "-9",
+                          "RawP_6" = "-6",
+                          "RawP_3" = "-3",
+                          "RawP_0" = "0"))
+
+melt_df$variable <- as.numeric(melt_df$variable)
+ 
+melt_df$value <- -log10(melt_df$value)
+
+melt_df <- melt_df %>% 
+  mutate(variable = recode(variable, 
+                          "1" = "-9",
+                          "2" = "-6",
+                          "3" = "-3",
+                          "4" = "0"))
+
+melt_df$variable <- as.numeric(melt_df$variable)
+
+head(melt_df)
+```
+
+
+
+```{r}
+melt_df_Bile <- melt_df[melt_df$path == 'Bile secretion',]
+melt_df_Bile
+
+pd <- position_dodge(0.00) 
+Bile <- ggplot(melt_df_Bile, 
+           aes(x = variable, y = value)) + 
+  geom_line(size = 1.3,
+            color = '#4DBBD5FF') +
+  geom_point(color = "black",
+             size = 4, 
+             shape = 21,
+             stroke = 1.3,
+             fill= '#4DBBD5FF') +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme(text = element_text(size=14),
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       legend.position = "none") +
+       ggtitle("Bile Secretion\n ") +
+       rremove("legend.title") +
+  scale_y_continuous(limits=c(0,5),
+                     labels = label_number(accuracy = 0.1), 
+                     breaks=seq(0,5, by = 1)) + 
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  scale_fill_manual(values=c('#4DBBD5FF')) +
+  scale_color_manual(values=c("4DBBD5FF")) + 
+  guides(color = "none")
+Bile
+
+
+
+
+melt_df_Bile <- melt_df[melt_df$path == 'Phe metabolism',]
+melt_df_Bile
+
+pd <- position_dodge(0.00) 
+Phe <- ggplot(melt_df_Bile, 
+           aes(x = variable, y = value)) + 
+  geom_line(size = 1.3,
+            color = '#4DBBD5FF') +
+  geom_point(color = "black",
+             size = 4, 
+             shape = 21,
+             stroke = 1.3,
+             fill= '#4DBBD5FF') +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme(text = element_text(size=14),
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       legend.position = "none") +
+       ggtitle("Phenylalanine\nMetabolism") +
+       rremove("legend.title") +
+  scale_y_continuous(limits=c(0,5),
+                     labels = label_number(accuracy = 0.1), 
+                     breaks=seq(0,5, by = 1)) + 
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  scale_fill_manual(values=c('#4DBBD5FF')) +
+  scale_color_manual(values=c("4DBBD5FF")) + 
+  guides(color = "none")
+Phe
+
+
+
+melt_df_Bile <- melt_df[melt_df$path == 'Cys/Met metabolism',]
+melt_df_Bile
+
+pd <- position_dodge(0.00) 
+Cys <- ggplot(melt_df_Bile, 
+           aes(x = variable, y = value)) + 
+  geom_line(size = 1.3,
+            color = '#4DBBD5FF') +
+  geom_point(color = "black",
+             size = 4, 
+             shape = 21,
+             stroke = 1.3,
+             fill= '#4DBBD5FF') +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme(text = element_text(size=14),
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       legend.position = "none") +
+       ggtitle("Cysteine/Methionine\nMetabolism") +
+       rremove("legend.title") +
+  scale_y_continuous(limits=c(0,5),
+                     labels = label_number(accuracy = 0.1), 
+                     breaks=seq(0,5, by = 1)) + 
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  scale_fill_manual(values=c('#4DBBD5FF')) +
+  scale_color_manual(values=c("4DBBD5FF")) + 
+  guides(color = "none")
+Cys
+
+
+
+
+
+melt_df_Bile <- melt_df[melt_df$path == 'Retrograde EC signaling',]
+melt_df_Bile
+
+pd <- position_dodge(0.00) 
+Retro <- ggplot(melt_df_Bile, 
+           aes(x = variable, y = value)) + 
+  geom_line(size = 1.3,
+            color = '#4DBBD5FF') +
+  geom_point(color = "black",
+             size = 4, 
+             shape = 21,
+             stroke = 1.3,
+             fill= '#4DBBD5FF') +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme(text = element_text(size=14),
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       legend.position = "none") +
+       ggtitle("Retrograde Endocannabinoid\nSignaling") +
+       rremove("legend.title") +
+  scale_y_continuous(limits=c(0,5),
+                     labels = label_number(accuracy = 0.1), 
+                     breaks=seq(0,5, by = 1)) + 
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  scale_fill_manual(values=c('#4DBBD5FF')) +
+  scale_color_manual(values=c("4DBBD5FF")) + 
+   guides(color = "none")
+Retro
+
+
+
+melt_df_Bile <- melt_df[melt_df$path == 'Choline metabolism',]
+melt_df_Bile
+
+pd <- position_dodge(0.00) 
+Choline <- ggplot(melt_df_Bile, 
+           aes(x = variable, y = value)) + 
+  geom_line(size = 1.3,
+            color = '#4DBBD5FF') +
+  geom_point(color = "black",
+             size = 4, 
+             shape = 21,
+             stroke = 1.3,
+             fill= '#4DBBD5FF') +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme(text = element_text(size=14),
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       legend.position = "none") +
+       ggtitle("Choline\nMetabolism") +
+       rremove("legend.title") +
+  scale_y_continuous(limits=c(0,5),
+                     labels = label_number(accuracy = 0.1), 
+                     breaks=seq(0,5, by = 1)) + 
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  scale_fill_manual(values=c('#4DBBD5FF')) +
+  scale_color_manual(values=c("4DBBD5FF")) + 
+   guides(color = "none")
+Choline
+
+
+melt_df_Bile <- melt_df[melt_df$path == 'Val/Leu/Ile biosynthesis',]
+melt_df_Bile
+
+pd <- position_dodge(0.00) 
+Val <- ggplot(melt_df_Bile, 
+           aes(x = variable, y = value)) + 
+  geom_line(size = 1.3,
+            color = '#4DBBD5FF') +
+  geom_point(color = "black",
+             size = 4, 
+             shape = 21,
+             stroke = 1.3,
+             fill= '#4DBBD5FF') +
+  theme_pubr() +
+  scale_x_continuous(breaks=seq(-9, 9, 3)) +
+  ylab(bquote(~-Log[10]~ 'P')) +
+  theme(text = element_text(size=14),
+       plot.title = element_text(hjust = 0.5, face = "bold"),
+       axis.title.y = element_text(vjust = +1),
+       legend.position = "none") +
+       ggtitle("Valine-Leucine-Isoleucine\nBiosythesis") +
+       rremove("legend.title") +
+  scale_y_continuous(limits=c(0,5),
+                     labels = label_number(accuracy = 0.1), 
+                     breaks=seq(0,5, by = 1)) + 
+  coord_cartesian(clip = "off") +
+  geom_hline(yintercept=1.3, linetype="dashed", 
+                color = "black", size=0.5) +
+  scale_fill_manual(values=c('#4DBBD5FF')) +
+  scale_color_manual(values=c("4DBBD5FF")) + 
+   guides(color = "none")
+Val
+
+```
+
+
+
+
+```{r}
+Path <- ggarrange(Bile, Phe, Cys, Retro, Choline, Val, 
+                ncol = 2, nrow = 3, legend = "none", align = "hv")
+Path
+ggsave("Pathways.png", plot=Path, path=figures, height=12, width=10, units=c("in"), dpi=300)
+```
+
+
+
+
+
+
+
+```{r}
+# Bile secretion
+selfcontained.test(pvalue=c(0.01963,	0.00002,	0.01775,	0.00236), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Phenylalanine metabolism
+selfcontained.test(pvalue=c(0.00437,	0.05829,	0.01187,	0.00086), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Cysteine and methionine metabolism
+selfcontained.test(pvalue=c(0.01598,	0.03963,	0.00500,	0.02422), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Retrograde endocannabinoid signaling
+selfcontained.test(pvalue=c(0.01473,	0.01238,	0.08398,	0.00230), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Choline metabolism in cancer
+selfcontained.test(pvalue=c(0.06815,	0.00826,	0.02966,	0.02257), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Valine, leucine and isoleucine biosynthesis
+selfcontained.test(pvalue=c(0.00008,	0.03793,	0.15402,	0.00974), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# NF-kappa B signaling pathway
+selfcontained.test(pvalue=c(0.06234,	0.00708,	0.02694,	0.11529), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Histidine metabolism
+selfcontained.test(pvalue=c(0.12240,	0.04617,	0.00916,	0.05757), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Aldosterone synthesis and secretion
+selfcontained.test(pvalue=c(0.08532,	0.00254,	0.16911,	0.02893), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# ABC transporters
+selfcontained.test(pvalue=c(0.07373,	0.15828,	0.00090,	0.08124), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Carbohydrate digestion and absorption
+selfcontained.test(pvalue=c(0.02604,	0.20794,	0.07629,	0.06350), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Glycerophospholipid metabolism
+selfcontained.test(pvalue=c(0.13804,	0.24361,	0.01340,	0.00934), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Endocrine and other factor-regulated calcium reabsorption
+selfcontained.test(pvalue=c(0.01566,	0.03266,	0.31508,	0.04502), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Linoleic acid metabolism
+selfcontained.test(pvalue=c(0.08680,	0.00406,	0.04816,	0.27248), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Kaposi sarcoma-associated herpesvirus infection
+selfcontained.test(pvalue=c(0.08327,	0.02250,	0.03015,	0.28666), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Adipocytokine signaling pathway
+selfcontained.test(pvalue=c(0.13986,	0.21634,	0.07988,	0.06653), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Thyroid hormone synthesis
+selfcontained.test(pvalue=c(0.19799,	0.09541,	0.11631,	0.09759), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Glycine, serine and threonine metabolism
+selfcontained.test(pvalue=c(0.00107,	0.00369,	0.42827,	0.08906), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Sphingolipid metabolism
+selfcontained.test(pvalue=c(0.02425,	0.19957,	0.36040,	0.00741), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Pentose and glucuronate interconversions
+selfcontained.test(pvalue=c(0.00729,	0.08214,	0.42469,	0.08738), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Sphingolipid signaling pathway
+selfcontained.test(pvalue=c(0.32242,	0.19860,	0.04973,	0.03826), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Insulin secretion
+selfcontained.test(pvalue=c(0.052771, 	0.10236, 	0.4561, 0.017067), weight=NA,p_permu=NA) 
+```
+```{r}
+# cAMP signaling pathway
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Adrenergic signaling in cardiomyocytes
+selfcontained.test(pvalue=c(0.04872,	0.10970,	0.25708,	0.22075), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# AGE-RAGE signaling pathway in diabetic complications
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Arginine biosynthesis
+selfcontained.test(pvalue=c(0.31775,	0.09026,	0.03004,	0.21762), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Mineral absorption
+selfcontained.test(pvalue=c(0.00674,	0.63441,	0.01647,	0.01242), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Arginine and proline metabolism
+selfcontained.test(pvalue=c(0.00083,	0.18121,	0.00798,	0.51160), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Salivary secretion
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Insulin resistance
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Tyrosine metabolism
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Pyrimidine metabolism
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+```{r}
+# Gastric acid secretion
+selfcontained.test(pvalue=c(), weight=NA,p_permu=NA) 
+```
+
+
+
+
+
+
+```{r}
+# Arginine and proline metabolism
+selfcontained.test(pvalue=c(0.00083,	0.18121,	0.00798,	0.51160), weight=NA,p_permu=NA) 
+```
+
+
+
+
+
+```{r}
+selfcontained.test<-function(pvalue,weight=NA,p_permu=NA) 
+{  
+  if (sum(is.na(pvalue))>0) {stop ("Error: pvalue is NA.")}
+  if (min(pvalue)<0) {stop ("Error: pvalue is negative.")}
+  if (max(pvalue)>1) {stop ("Error: pvalue is >1.")}
+  if (is.na(weight)[1]) {weight=rep(2, length(pvalue))}
+  if (length(pvalue)!=length(weight)){stop ("Error: length(pvalue)!=length(weight).")}
+  if (min(weight)<0) {stop ("Error: weight is negative.")}
+  if (!is.na(p_permu)[1]) {if (nrow(p_permu)!=length(pvalue)) {stop ("Error: nrow(p_permu)!=length(pvalue)")}}
+  if (!is.na(p_permu)[1]) {if (nrow(p_permu)!=length(pvalue)) {stop ("Error: nrow(p_permu)!=length(pvalue)")}}
+  
+  et<-sum(weight)
+  fun2<-function(x){qchisq(1-x,df=weight)}
+  if (is.na(p_permu)[1]) {vart<-2*sum(weight)} else {vart<-sum(cov(t(apply(p_permu,2,fun2))))}
+  v<-2*et^2/vart
+  c<-vart/2/et
+  T<-sum(qchisq(1-pvalue,weight)) 
+  if (is.na(p_permu)[1]) {cor_p<-diag(length(pvalue))} else {cor_p<-cor(t(p_permu))}
+  return(list("significance level for combining pvalues"=pchisq(T/c, v, lower.tail=FALSE), "correlation among pvalues"=cor_p))
+}
+```
+

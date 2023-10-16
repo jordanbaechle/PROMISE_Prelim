@@ -1,0 +1,182 @@
+
+### Packages
+```{r}
+library(ggVennDiagram)
+library(ggplot2)
+library(readr)
+library(dplyr)
+figures <- "/opt/home/buckcenter.org/jbaechle/promise_project/figures"
+```
+
+### Load DEPs
+```{r}
+down0 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre0_DEP_down.csv", col_names = FALSE)
+up0 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre0_DEP_up.csv", col_names = FALSE)
+down0 = down0[-1,]
+up0 = up0[-1,]
+
+down3 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre3_DEP_down.csv", col_names = FALSE)
+up3 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre3_DEP_up.csv", col_names = FALSE)
+down3 = down3[-1,]
+up3 = up3[-1,]
+
+down6 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre6_DEP_down.csv", col_names = FALSE)
+up6 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre6_DEP_up.csv", col_names = FALSE)
+down6 = down6[-1,]
+up6 = up6[-1,]
+
+down9 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre9_DEP_down.csv", col_names = FALSE)
+up9 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/proteomics/Pre9_DEP_up.csv", col_names = FALSE)
+down9 = down9[-1,]
+up9 = up9[-1,]
+
+dataset_up0 <- as.character(as.data.frame(up0)$X1)
+dataset_up3 <- as.character(as.data.frame(up3)$X1)
+dataset_up6 <- as.character(as.data.frame(up6)$X1)
+dataset_up9 <- as.character(as.data.frame(up9)$X1)
+
+dataset_down0 <- as.character(as.data.frame(down0)$X1)
+dataset_down3 <- as.character(as.data.frame(down3)$X1)
+dataset_down6 <- as.character(as.data.frame(down6)$X1)
+dataset_down9 <- as.character(as.data.frame(down9)$X1)
+
+x_up <- list(A = dataset_up9, B = dataset_up6, C = dataset_up3, D = dataset_up0)
+x_down <- list(A = dataset_down9, B = dataset_down6, C = dataset_down3, D = dataset_down0)
+
+VDplot_up <- ggVennDiagram(x_up, lwd = 2, set_color = c("white","white","white","white")) + 
+        scale_color_manual(values = c("black","black","black","black")) +
+        scale_fill_gradient(low = "#ffffff", high = "#DC0000B2", breaks=c(0,40,80,120),
+                           limits=c(0,120)) 
+VDplot_up
+ggsave("venn_diagram_DEP_up.png", plot=VDplot_up, path = figures, height=6, width=6, units=c("in"), dpi=300)
+
+VDplot_down  <- ggVennDiagram(x_down, lwd = 2, set_color = c("white","white","white","white")) + 
+        scale_color_manual(values = c("black","black","black","black")) +
+        scale_fill_gradient(low = "#ffffff", high = "#3C5488B2", breaks=c(0,40,80,120),
+                           limits=c(0,120)) 
+VDplot_down 
+ggsave("venn_diagram_DEP_down.png", plot=VDplot_down, path = figures,  height=6, width=6, units=c("in"), dpi=300)
+
+res_DEP_03_up <- merge(up0, up3, by="X1")
+res_DEP_03_down <- merge(down0, down3, by="X1")
+res_DEP_36_up <- merge(up3, up6, by="X1")
+res_DEP_36_up <- merge(up6, up9, by="X1")
+res_DEP_36_down <- merge(down3, down6, by="X1")
+res_DEP_39_down <- merge(down3, down9, by="X1")
+res_DEP_69_down <- merge(down6, down9, by="X1")
+res_DEP_369_down <- merge(res_DEP_36_down, down9, by="X1")
+res_DEP_0369_down <- merge(down0, res_DEP_369_down, by="X1")
+```
+
+### Load DEMs
+```{r}
+down0 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre0_DEM_down.csv", col_names = FALSE)
+up0 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre0_DEM_up.csv", col_names = FALSE)
+down0 = down0[-1,]
+up0 = up0[-1,]
+
+down3 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre3_DEM_down.csv", col_names = FALSE)
+up3 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre3_DEM_up.csv", col_names = FALSE)
+down3 = down3[-1,]
+up3 = up3[-1,]
+
+down6 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_DEM_down.csv", col_names = FALSE)
+up6 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre6_DEM_up.csv", col_names = FALSE)
+down6 = down6[-1,]
+up6 = up6[-1,]
+
+down9 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre9_DEM_down.csv", col_names = FALSE)
+up9 <- read_csv("/bigrock/FurmanLab/DataRepository/promise/metabolomics/Pre9_DEM_up.csv", col_names = FALSE)
+down9 = down9[-1,]
+up9 = up9[-1,]
+
+dataset_up0 <- as.character(as.data.frame(up0)$X1)
+dataset_up3 <- as.character(as.data.frame(up3)$X1)
+dataset_up6 <- as.character(as.data.frame(up6)$X1)
+dataset_up9 <- as.character(as.data.frame(up9)$X1)
+
+dataset_down0 <- as.character(as.data.frame(down0)$X1)
+dataset_down3 <- as.character(as.data.frame(down3)$X1)
+dataset_down6 <- as.character(as.data.frame(down6)$X1)
+dataset_down9 <- as.character(as.data.frame(down9)$X1)
+
+x_up <- list(A = dataset_up9, B = dataset_up6, C = dataset_up3, D = dataset_up0)
+x_down <- list(A = dataset_down9, B = dataset_down6, C = dataset_down3, D = dataset_down0)
+
+VDplot_up <- ggVennDiagram(x_up, lwd = 2, set_color = c("white","white","white","white")) + 
+        scale_color_manual(values = c("black","black","black","black")) +
+        scale_fill_gradient(low = "#ffffff", high = "#DC0000B2", breaks=c(0,40,80,120),
+                           limits=c(0,120)) 
+VDplot_up
+ggsave("venn_diagram_DEM_up.png", plot=VDplot_up, path = figures, height=6, width=6, units=c("in"), dpi=300)
+
+VDplot_down  <- ggVennDiagram(x_down, lwd = 2,  set_color = c("white","white","white","white")) + 
+        scale_color_manual(values = c("black","black","black","black")) +
+        scale_fill_gradient(low = "#ffffff", high = "#3C5488B2", breaks=c(0,40,80,120),
+                           limits=c(0,120)) 
+VDplot_down 
+ggsave("venn_diagram_DEM_down.png", plot=VDplot_down, path = figures,  height=6, width=6, units=c("in"), dpi=300)
+
+res_DEM_36_up <- merge(up3, up6, by="X1")
+res_DEM_39_up <- merge(up3, up9, by="X1")
+res_DEM_69_up <- merge(up6, up9, by="X1")
+
+res_DEM_36_down <- merge(down3, down6, by="X1")
+res_DEM_39_down <- merge(down3, down9, by="X1")
+res_DEM_03_up <- merge(up0, up3, by="X1")
+res_DEM_03_down <- merge(down0, down3, by="X1")
+res_DEP_36_up <- merge(up3, up6, by="X1")
+res_DEP_36_up <- merge(up6, up9, by="X1")
+res_DEP_36_down <- merge(down3, down6, by="X1")
+res_DEP_39_down <- merge(down3, down9, by="X1")
+res_DEP_69_up <- merge(up6, up9, by="X1")
+
+res_DEM_03_up <- merge(up0, up3, by="X1")
+res_DEP_69_up  <- merge(up6, up9, by="X1")
+res_DEP_0369_up  <- merge(res_DEM_03_up, res_DEP_69_up, by="X1")
+
+
+```
+
+
+
+
+# Append data frames
+```{r}
+A <- rbind(dataset_up1, dataset_down1)
+B <- rbind(dataset_up2, dataset_down2)
+C <- rbind(dataset_up3, dataset_down3)
+```
+
+
+```{r}
+jaccard <- function(A, B) 
+  {
+    intersection = length(intersect(A, B))
+    union = length(A) + length(B) - intersection
+    return (intersection/union)
+  }
+jaccard(A, B)
+```
+
+
+```{r}
+jaccard <- function(A, C) 
+  {
+    intersection = length(intersect(A, C))
+    union = length(A) + length(C) - intersection
+    return (intersection/union)
+  }
+jaccard(A, C)
+```
+
+
+```{r}
+jaccard <- function(C, B) 
+  {
+    intersection = length(intersect(C, B))
+    union = length(C) + length(B) - intersection
+    return (intersection/union)
+  }
+jaccard(C, B)
+```

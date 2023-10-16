@@ -1,0 +1,272 @@
+
+
+
+1st comparison: pre vs post (convert)
+2nd comparison: pre vs post (control)
+3rd comparison: convert lfc vs control lfc
+
+```{r}
+countData <- read_excel("/bigrock/FurmanLab/DataRepository/promise/metabolomics/promise_metabolomics_all_trans.xlsx")
+countData <- countData[!startsWith(countData$metabolite, "X-"),]
+countData  <- countData %>% distinct(metabolite, .keep_all = TRUE)
+df <- data.frame(countData)
+cols <- sapply(df, is.numeric)
+df[cols] <- 1000*df[cols]
+head(df)
+df <- cbind(df[,1], sapply(df[,-1], as.integer))
+colnames(df)[1] <- "metabolite"
+df <- as.data.frame(df)
+
+
+### comparison 1
+prepostOGTT_pre6 <- df |>
+select("metabolite", 
+       "X2249.0.Y3", "X2249.120.Y3", "X2321.0.Y3", "X2321.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", "X2127.0.Y3", "X2127.120.Y3",
+       "X2089.0.Y3", "X2089.120.Y3", "X2099.0.Y3", "X2099.120.Y3",
+       "X2261.0.Y3", "X2261.120.Y3", "X1397.0.Y3", "X1397.120.Y3",
+       "X2070.0.Y3", "X2070.120.Y3", "X1300.0.Y3", "X1300.120.Y3",
+       "X2220.0.Y3", "X2220.120.Y3", "X1152.0.Y3", "X1152.120.Y3")
+
+convert_6 <- prepostOGTT_pre6 |>
+select("metabolite", 
+       "X2321.0.Y3", "X2321.120.Y3",
+       "X2127.0.Y3", "X2127.120.Y3",
+       "X2099.0.Y3", "X2099.120.Y3",
+       "X1397.0.Y3", "X1397.120.Y3",
+       "X1300.0.Y3", "X1300.120.Y3",
+       "X1152.0.Y3", "X1152.120.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X2321.0.Y3", "X2321.120.Y3",
+        "X2127.0.Y3", "X2127.120.Y3",
+        "X2099.0.Y3", "X2099.120.Y3",
+        "X1397.0.Y3", "X1397.120.Y3",
+        "X1300.0.Y3", "X1300.120.Y3",
+        "X1152.0.Y3", "X1152.120.Y3"),
+      
+      Site = 
+      c("Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post",
+        "Pre", "Post"))
+
+df <- cbind(as.data.frame(convert_6[,1]), 
+            sapply(convert_6[,-1], as.numeric))
+colnames(df)[1] <- "metabolite"
+convert_6_countData <- as.data.frame(df)
+convert_6_countData  <- convert_6_countData  |> na.omit()
+
+# Differential metabolites
+countData <- as.data.frame(convert_6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+convert_DEGs <- results(dds, contrast=c("Site","Post", "Pre"))
+
+
+### comparison 2
+control_6 <- prepostOGTT_pre6 |>
+select("metabolite", 
+       "X2249.0.Y3","X2249.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", 
+       "X2089.0.Y3", "X2089.120.Y3", 
+       "X2261.0.Y3", "X2261.120.Y3", 
+       "X2070.0.Y3", "X2070.120.Y3", 
+       "X2220.0.Y3", "X2220.120.Y3")
+
+metaData6 <- data.frame (
+      id  = 
+      c("X2249.0.Y3","X2249.120.Y3",
+       "X2280.0.Y3", "X2280.120.Y3", 
+       "X2089.0.Y3", "X2089.120.Y3", 
+       "X2261.0.Y3", "X2261.120.Y3", 
+       "X2070.0.Y3", "X2070.120.Y3", 
+       "X2220.0.Y3", "X2220.120.Y3"),
+      
+      Site = 
+      c("Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post", 
+        "Pre", "Post",
+        "Pre", "Post",
+        "Pre", "Post"))
+
+df <- cbind(as.data.frame(control_6[,1]), 
+            sapply(control_6[,-1], as.numeric))
+colnames(df)[1] <- "metabolite"
+control_6_countData <- as.data.frame(df)
+control_6_countData  <- control_6_countData  |> na.omit()
+
+# Differential metabolites
+countData <- as.data.frame(control_6_countData)
+metaData <- as.data.frame(metaData6)
+dds <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~Site, tidy = TRUE)
+dds <- DESeq(dds)
+res <- results(dds)
+control_DEGs <- results(dds, contrast=c("Site","Post", "Pre"))
+
+### comparison 3
+
+convert_DEGs$metabolite <- rownames(convert_DEGs)
+convert_DEGs <- as.data.frame(convert_DEGs)
+convert_DEGs <- convert_DEGs %>% 
+                 dplyr::rename("pvalue.convert" = "pvalue",
+                        "padj.convert" = "padj",
+                        "log2FoldChange.convert" = "log2FoldChange") %>%
+                dplyr::select("metabolite", "log2FoldChange.convert", "pvalue.convert", "padj.convert")
+
+control_DEGs$metabolite <- rownames(control_DEGs)
+control_DEGs <- as.data.frame(control_DEGs)
+control_DEGs <- control_DEGs %>% 
+                 dplyr::rename("pvalue.control" = "pvalue",
+                        "padj.control" = "padj",
+                        "log2FoldChange.control" = "log2FoldChange") %>%
+                dplyr::select("metabolite", "log2FoldChange.control", "pvalue.control", "padj.control")
+
+
+
+convert_control_DEGs <- merge(convert_DEGs, control_DEGs, by="metabolite")
+
+convert_control_DEGs  <- convert_control_DEGs |> na.omit()
+
+convert_control_DEGs$log2FoldChange.delta <- (convert_control_DEGs$log2FoldChange.convert - convert_control_DEGs$log2FoldChange.control)
+  
+convert_control_DEGs$pvalue.median <- (convert_control_DEGs$pvalue.convert + convert_control_DEGs$pvalue.control)/2
+
+```
+
+```{r}
+res <- convert_control_DEGs
+rownames(res) <- res[,1]
+res$log2FoldChange <- res$log2FoldChange.delta
+res$pvalue <- res$pvalue.median
+res <- res |> select(log2FoldChange, pvalue)
+head(res)
+
+
+ keyvals.colour <- ifelse(
+    res$log2FoldChange < -0 & res$pvalue < 0.05, "#3C5488B2",
+      ifelse(res$log2FoldChange > 0 & res$pvalue < 0.05, "#DC0000B2",
+        'black'))
+  keyvals.colour[is.na(keyvals.colour)] <- 'black'
+  names(keyvals.colour)[keyvals.colour == "#DC0000B2"] <- 'high'
+  names(keyvals.colour)[keyvals.colour == 'black'] <- 'ns'
+  names(keyvals.colour)[keyvals.colour == "#3C5488B2"] <- 'low'
+
+
+PrePost6_OGTT <- EnhancedVolcano(res,
+                      title = NULL,
+                      subtitle = NULL,
+                      lab = rownames(res),
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(Delta ~Log[2]~ 'fold change'),
+                      pCutoff = 0.05,
+                      FCcutoff = 0,
+                      labSize = 3,
+                      pointSize = c(ifelse(abs(res$pvalue) < 0.05, 2, 1.5)),
+                      boxedLabels = FALSE,
+                      legendPosition = 'none',
+                      legendLabSize = 11,
+                      legendIconSize = 4.0,
+                      drawConnectors = TRUE,
+                      arrowheads = FALSE,
+                      colCustom = keyvals.colour,
+                      colAlpha = c(ifelse(abs(res$pvalue) < 0.05, 0.5, 0.2)),
+                      caption = NULL,
+                       max.overlaps = 10,
+                      maxoverlapsConnectors = 10,
+                      widthConnectors = 0.3, xlim = c(-6, 6),ylim = c(0, -log10(10e-6)))
+PrePost6_OGTT <- PrePost6_OGTT + theme_pubr() +
+  annotate("rect", xmin = -6, xmax = -0.1, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05) +
+  annotate("rect", xmin = 0.1, xmax = 6, ymin = -log10(0.04), ymax = -log10(10e-6), alpha = .05)
+PrePost6_OGTT
+#ggsave("Pre6_OGTT_Volcano_DEM.png", plot=PrePost6_OGTT, path=figures, height=7, width=6, units=c("in"), dpi=300)
+```
+
+
+
+
+
+
+```{r}
+res$metabolite <- rownames(res) 
+res <- as.data.frame(convert_control_DEGs)
+res  <- res |> na.omit()
+# res <- res |> select(metabolite, log2FoldChange.control, pvalue.control, log2FoldChange.convert, pvalue.convert)
+res <- res |> select(metabolite, log2FoldChange.control, log2FoldChange.convert)
+
+res2 <- filter(res, metabolite %in% c(
+                    'cholate','chenodeoxycholate', 'glycocholate', 'glycochenodeoxycholate', 'glyco-beta-muricholate**', 
+                    'glycochenodeoxycholate glucuronide (1)', 'glycocholate-glucuronide (1)', 'glycochenodeoxycholate 3-sulfate',
+                    'taurocholate', 'taurochenodeoxycholate', 'deoxycholate', 'isoursodeoxycholate', 'isoursodeoxycholate sulfate (1)', 
+                    'lithocholate', 'ursodeoxycholate', '7-ketodeoxycholate', 'lithocholate sulfate (1)', 'hyocholate', '7-ketolithocholate',
+                    'glycodeoxycholate', 'glycolithocholate', 'glycoursodeoxycholate', 'glycodeoxycholate 3-sulfate', 'glycohyocholate', 
+                    'glycolithocholate sulfate*', 'taurochenodeoxycholate', 'taurodeoxycholate', 'taurolithocholate',
+                     'tauroursodeoxycholate', 'taurolithocholate 3-sulfate', 'tauro-beta-muricholate'))
+
+melt_res2 <- melt(res2, na.rm = FALSE, id = c("metabolite"))
+head(melt_res2)
+```
+
+```{r}
+melt_res2$metabolite = factor(melt_res2$metabolite, levels = c('cholate','chenodeoxycholate', 
+                                                                        
+                                                                        'glycocholate', 'glycochenodeoxycholate', 'glyco-beta-muricholate**', 'glycochenodeoxycholate glucuronide (1)', 
+                                                                        'glycocholate-glucuronide (1)', 'glycochenodeoxycholate 3-sulfate',
+                                                                        
+                                                                        'taurocholate', 'taurochenodeoxycholate',
+                                                                        
+                                                                        'deoxycholate', 'isoursodeoxycholate', 'isoursodeoxycholate sulfate (1)', 'lithocholate', 'ursodeoxycholate',
+                                                                        '7-ketodeoxycholate', 'lithocholate sulfate (1)', 'hyocholate', '7-ketolithocholate',
+                                                                        
+                                                                        'glycodeoxycholate', 'glycolithocholate', 'glycoursodeoxycholate', 'glycodeoxycholate 3-sulfate',
+                                                                        'glycohyocholate', 'glycolithocholate sulfate*',
+                                                                        
+                                                                        'taurodeoxycholate', 'taurolithocholate',
+                                                                        'tauroursodeoxycholate', 'taurolithocholate 3-sulfate', 'tauro-beta-muricholate'))
+```
+
+
+
+
+```{r}
+Barplot_lfc <- ggplot(melt_res2, 
+    aes(fill=variable, y=value, x=metabolite)) + 
+    geom_bar(position="dodge", stat="identity", color='black') +
+         theme_pubr()+
+         theme(plot.title = element_text(face="bold"),
+         axis.text.y = element_text(color='black'),
+         axis.text.x = element_text(color='black'),
+         axis.text = element_text(size = 16),
+         panel.background=element_blank(),
+         plot.background=element_blank(),
+         legend.title = element_blank())  +
+          ylab(bquote('Post-' ~vs.~ 'Pre-OGTT' ~Log[2]~ 'fold change')) +
+          xlab(" ") +
+         scale_y_continuous(limits=c(-3,3), breaks=seq(-3,3, by = 1)) +
+         geom_hline(yintercept=0, linetype="solid",
+         color = "black", size=0.5) +
+         scale_x_discrete(limits=rev) +
+         scale_fill_manual(values=c("#00A087FF", "#E64B35FF")) +
+         coord_flip() 
+
+ggsave("Bile_acid_Barplot_lfc.png", plot=Barplot_lfc, path=figures, height=9, width=8, units=c("in"), dpi=300)
+```
+
+
+
+
+
+
+
+
+
+
+
+
